@@ -127,7 +127,6 @@ function refresh(body) {
 
     // Re-initialize the page
     init();
-    autoCollapse();
 
     document.querySelector('body').className = '';
 }
@@ -209,7 +208,7 @@ function init() {
         navItems[i].onclick = toggleCollapseNav;
 
         // Show all by default
-        toggleCollapseNav({target: navItems[i].children[0]});
+        // toggleCollapseNav({target: navItems[i].children[0]});
     }
 }
 
@@ -217,7 +216,6 @@ function init() {
 init();
 
 window.onload = function () {
-    autoCollapse();
     // Remove the `preload` class to enable animations
     document.querySelector('body').className = '';
 };
