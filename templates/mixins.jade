@@ -132,6 +132,15 @@ mixin Attributes(params)
                         strong Example:&nbsp;
                         span= param.content.value.content[0].content
                         //- normal examples
+                else if param.content.value.element == 'array'
+                    span.text-muted.example
+                        strong Example:&nbsp;
+                        span= '['
+                            each value, index in param.content.value.content
+                                | #{self.urldec(value.element)}
+                                if index < Object.keys(param.content.value.content).length - 1
+                                    |,
+                            |]
                 else if param.content.value.content
                         span.text-muted.example
                             strong Example:&nbsp;
@@ -143,6 +152,13 @@ mixin Attributes(params)
                         each value in param.content.value.content
                             code= self.urldec(value.content)
                             = ' '
+                if param.content.value.element == 'array'
+                    p.choices
+                        strong Elements:&nbsp;
+                        each value in param.content.value.content
+                            code= self.urldec(value.element)
+                            = ' '
+
 mixin RequestResponse(title, request, collapse)
     .title
         strong
