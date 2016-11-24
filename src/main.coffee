@@ -410,7 +410,12 @@ decorate = (api, md, slugCache, verbose) ->
             for item in example[name] or []
               if name is 'requests' and not action.hasRequest
                 action.hasRequest = true
+                action.request = []
 
+                for header in item.headers
+                  if header.name is 'Content-Type'
+                    console.log('!!!!!' + header.value)
+                    action.request.contentType = header.value
               # If there is no schema, but there are MSON attributes, then try
               # to generate the schema. This will fail sometimes.
               # TODO: Remove me when Drafter is released.
@@ -419,7 +424,7 @@ decorate = (api, md, slugCache, verbose) ->
                   if dataStructure.element is 'dataStructure'
                     if name is 'requests'
                       console.log(
-                        JSON.stringify dataStructure.content[0].content,
+                        JSON.stringify item,
                         null, 2
                       )
                       action.attributes = dataStructure.content[0].content

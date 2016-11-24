@@ -99,14 +99,13 @@ mixin Parameters(params)
                             code= self.urldec(value.value)
                             = ' '
 
-mixin Attributes(params)
-    div
-        - console.log(params)
-    div
+mixin Attributes(params, contentType)
     //- Draw a definition list of attribute names, types, defaults,
     //- examples and descriptions.
     .title
         strong Request Attributes
+        if contentType
+            | &nbsp; (#{contentType})
         .collapse-button.show
             span.close Hide
             span.open Show
@@ -346,7 +345,7 @@ mixin ContentTriple()
                             != self.markdown(action.description)
 
                         if action.attributes.length
-                            +Attributes(action.attributes)
+                            +Attributes(action.attributes, action.request.contentType)
 
                         //- A list of sub-sections for parameters, requests
                         //- and responses.
