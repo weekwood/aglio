@@ -324,7 +324,6 @@ decorate = (api, md, slugCache, verbose) ->
 
   # Use the slug caching mechanism
   slugify = slug.bind slug, slugCache
-
   # Find data structures. This is a temporary workaround until Drafter is
   # updated to support JSON Schema again.
   # TODO: Remove me when Drafter is released.
@@ -418,6 +417,12 @@ decorate = (api, md, slugCache, verbose) ->
               if not item.schema and item.content
                 for dataStructure in item.content
                   if dataStructure.element is 'dataStructure'
+                    if name is 'requests'
+                      console.log(
+                        JSON.stringify dataStructure.content[0].content,
+                        null, 2
+                      )
+                      action.attributes = dataStructure.content[0].content
                     try
                       schema = renderSchema(
                         dataStructure.content[0], dataStructures)

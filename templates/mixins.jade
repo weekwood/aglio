@@ -99,6 +99,50 @@ mixin Parameters(params)
                             code= self.urldec(value.value)
                             = ' '
 
+mixin Attributes(params)
+    div
+        - console.log(params)
+    div
+    //- Draw a definition list of attribute names, types, defaults,
+    //- examples and descriptions.
+    .title
+        strong Request Attributes
+        .collapse-button.show
+            span.close Hide
+            span.open Show
+    .collapse-content
+        dl.inner: each param in params || []
+            dt= self.urldec(param.content.key.content)
+            dd
+                code= param.content.value.element || 'string'
+                | &nbsp;
+                if param.attributes.typeAttributes.indexOf('required') > -1
+                    span.required (required)
+                else
+                    span (optional)
+                | &nbsp;
+                if param.default
+                    span.text-info.default
+                        strong Default:&nbsp;
+                        span= param.default
+                    | &nbsp;
+                //- examples for enums
+                if param.content.value.element == 'enum'
+                    span.text-muted.example
+                        strong Example:&nbsp;
+                        span= param.content.value.content[0].content
+                        //- normal examples
+                else if param.content.value.content
+                        span.text-muted.example
+                            strong Example:&nbsp;
+                            span= param.content.value.content
+                != self.markdown(param.meta.description)
+                if param.content.value.element == 'enum'
+                    p.choices
+                        strong Choices:&nbsp;
+                        each value in param.content.value.content
+                            code= self.urldec(value.content)
+                            = ' '
 mixin RequestResponse(title, request, collapse)
     .title
         strong
@@ -284,6 +328,9 @@ mixin ContentTriple()
                             code.uri= self.urldec(action.uriTemplate)
                         if action.description
                             != self.markdown(action.description)
+
+                        if action.attributes.length
+                            +Attributes(action.attributes)
 
                         //- A list of sub-sections for parameters, requests
                         //- and responses.
