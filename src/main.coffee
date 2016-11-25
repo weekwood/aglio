@@ -345,6 +345,15 @@ decorate = (api, md, slugCache, verbose) ->
   for meta in api.metadata or []
     if meta.name is 'HOST'
       api.host = meta.value
+    if meta.name is 'CURL_HOST'
+      api.curlHost = meta.value
+    if meta.name is 'CURL_OPTIONS'
+      api.curlOptions = meta.value
+
+  if not api.curlHost
+    api.curlHost = api.host
+  if not api.curlHost
+    api.curlOptions = ''
 
   for resourceGroup in api.resourceGroups or []
     # Element ID and link
@@ -414,8 +423,16 @@ decorate = (api, md, slugCache, verbose) ->
 
                 for header in item.headers
                   if header.name is 'Content-Type'
-                    console.log('!!!!!' + header.value)
                     action.request.contentType = header.value
+                  if header.name is 'Authorization'
+                    action.request.authorization = []
+                    action.request.authorization.raw = header.value
+                    if header.value.startsWith 'Basic '
+                      action.request.authorization.usernamepassword =
+                        new Buffer(
+                          (header.value.split 'Basic ' )[1],
+                          'base64'
+                        ).toString('ascii')
               # If there is no schema, but there are MSON attributes, then try
               # to generate the schema. This will fail sometimes.
               # TODO: Remove me when Drafter is released.
@@ -423,10 +440,6 @@ decorate = (api, md, slugCache, verbose) ->
                 for dataStructure in item.content
                   if dataStructure.element is 'dataStructure'
                     if name is 'requests'
-                      console.log(
-                        JSON.stringify item,
-                        null, 2
-                      )
                       action.attributes = dataStructure.content[0].content
                     try
                       schema = renderSchema(

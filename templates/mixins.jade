@@ -1,3 +1,17 @@
+script.
+  function copyToClipboardWithoutNewlines(elementId) {
+    var aux = document.createElement("input");
+    aux.setAttribute("value", document.getElementById(elementId).textContent);
+    document.body.appendChild(aux);
+    aux.select();
+    document.execCommand("copy");
+    document.body.removeChild(aux);
+  }
+  
+  function base64Decode(b64string) {
+    var buf = Buffer.from(b64string, 'base64');
+    return buf.toString();
+  }
 
 mixin Badge(method)
     //- Draw a badge for a given HTTP method
@@ -99,6 +113,46 @@ mixin Parameters(params)
                             code= self.urldec(value.value)
                             = ' '
 
+mixin CurlTemplate(action, api)
+    - var actionName = 'curl-' + action.elementId
+    div.curl
+      div.command
+        pre(id=actionName)
+            |curl '#{api.curlHost}
+            != action.colorizedUriTemplate
+            |'&nbsp;
+            if api.curlOptions
+                br
+                |&nbsp;&nbsp;&nbsp;&nbsp;#{api.curlOptions}
+            if action.method != 'GET'
+                br
+                |&nbsp;&nbsp;&nbsp;&nbsp;--request #{action.method}
+            if action.request.authorization
+                br
+                if action.request.authorization.usernamepassword
+                    |&nbsp;&nbsp;&nbsp;&nbsp;--user #{action.request.authorization.usernamepassword}
+                else
+                    |&nbsp;&nbsp;&nbsp;&nbsp;--header "Authorization: #{action.request.authorization.raw}"
+            each attribute in action.attributes
+                if attribute.content
+                    if attribute.content.value.element == 'object'
+                        if  attribute.content.value.content
+                            +CurlObject(attribute.content.key.content, attribute.content.value.content)
+                            |"                    
+                    else
+                        br
+                        |&nbsp;&nbsp;&nbsp;&nbsp;--data-urlencode #{attribute.content.key.content}="
+                        +Example(attribute)
+                        |"
+      div.copy
+          button(onclick='copyToClipboardWithoutNewlines(\'#{actionName}\')') copy curl command
+
+mixin CurlObject(field, object)
+    each member in object
+        if member.content.value.element == 'string'
+            br
+            |&nbsp;&nbsp;&nbsp;&nbsp;--data "#{field}[#{member.content.key.content}]=#{member.content.value.content}"
+
 mixin Attributes(params, contentType)
     //- Draw a definition list of attribute names, types, defaults,
     //- examples and descriptions.
@@ -115,7 +169,8 @@ mixin Attributes(params, contentType)
             dd
                 code= param.content.value.element || 'string'
                 | &nbsp;
-                if param.attributes.typeAttributes.indexOf('required') > -1
+                
+                if param.attributes && param.attributes.typeAttributes.indexOf('required') > -1
                     span.required (required)
                 else
                     span (optional)
@@ -126,25 +181,11 @@ mixin Attributes(params, contentType)
                         span= param.default
                     | &nbsp;
                 //- examples for enums
-                if param.content.value.element == 'enum'
-                    span.text-muted.example
-                        strong Example:&nbsp;
-                        span= param.content.value.content[0].content
-                        //- normal examples
-                else if param.content.value.element == 'array'
-                    span.text-muted.example
-                        strong Example:&nbsp;
-                        span= '['
-                            each value, index in param.content.value.content
-                                | #{self.urldec(value.element)}
-                                if index < Object.keys(param.content.value.content).length - 1
-                                    |,
-                            |]
-                else if param.content.value.content
-                        span.text-muted.example
-                            strong Example:&nbsp;
-                            span= param.content.value.content
-                != self.markdown(param.meta.description)
+                span.text-muted.example
+                    strong Example:&nbsp;
+                    +Example(param)
+                if param.meta && param.meta.description
+                    != self.markdown(param.meta.description)
                 if param.content.value.element == 'enum'
                     p.choices
                         strong Choices:&nbsp;
@@ -157,6 +198,27 @@ mixin Attributes(params, contentType)
                         each value in param.content.value.content
                             code= self.urldec(value.element)
                             = ' '
+
+mixin Example(param)
+    if param.content.value.element == 'enum'
+        span= param.content.value.content[0].content
+    else if param.content.value.element == 'array'
+        span= '['
+            each value, index in param.content.value.content
+                | #{self.urldec(value.element)}
+                if index < Object.keys(param.content.value.content).length - 1
+                    |,
+            |]
+    else if param.content.value.element == 'object'
+        if param.content.value.content
+            span
+                each member, index in param.content.value.content
+                    if member.content.value.element == 'string'
+                        |[#{member.content.key.content}]=#{member.content.value.content}
+                        if index < Object.keys(param.content.value.content).length - 1
+                            |,
+    else if param.content.value.content
+        span= param.content.value.content
 
 mixin RequestResponse(title, request, collapse)
     .title
@@ -298,11 +360,6 @@ mixin ContentTriple()
                 if action.examples
                     .right
                       .definition
-                          span.method(class=action.methodLower)= action.method
-                          | &nbsp;
-                          span.uri
-                            span.hostname= self.api.host
-                            != action.colorizedUriTemplate
                       .tabs
                           if action.hasRequest
                               .example-names
@@ -315,6 +372,7 @@ mixin ContentTriple()
                               each example in action.examples
                                   each request in example.requests
                                       .tab
+                                          +CurlTemplate(action, self.api)
                                           +RequestResponseBody(request, false, true)
                                           .tabs
                                               .example-names
