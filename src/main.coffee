@@ -423,12 +423,12 @@ decorate = (api, md, slugCache, verbose) ->
 
                 for header in item.headers
                   if header.name is 'Content-Type'
-                    action.request.contentType = header.value
+                    item.contentType = header.value
                   if header.name is 'Authorization'
-                    action.request.authorization = []
-                    action.request.authorization.raw = header.value
+                    item.authorization = []
+                    item.authorization.raw = header.value
                     if header.value.startsWith 'Basic '
-                      action.request.authorization.usernamepassword =
+                      item.authorization.usernamepassword =
                         new Buffer(
                           (header.value.split 'Basic ' )[1],
                           'base64'

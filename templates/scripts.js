@@ -189,7 +189,7 @@ function init() {
         }
     }
 
-    var responseCodes = document.querySelectorAll('.example-names');
+    var responseCodes = document.querySelectorAll('.tab-names');
     for (i = 0; i < responseCodes.length; i++) {
         var tabButtons = childrenByClass(responseCodes[i], 'tab-button');
         for (j = 0; j < tabButtons.length; j++) {
