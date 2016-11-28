@@ -186,45 +186,9 @@ mixin Attributes(params, contentType, title)
             span.close Hide
             span.open Show
     .collapse-content
-        //- - console.log(JSON.stringify(params,null,2))
         dl.inner
             each param in params
                 +AttributeObject(param, '', 0)
-        //- dl.inner: each param in params || []
-        //-     dt= self.urldec(param.content.key.content)
-        //-     dd
-        //-         code= param.content.value.element || 'string'
-        //-         | &nbsp;
-        //-         
-        //-         if param.attributes && param.attributes.typeAttributes.indexOf('required') > -1
-        //-             span.required (required)
-        //-         else
-        //-             span (optional)
-        //-         | &nbsp;
-        //-         if param.default
-        //-             span.text-info.default
-        //-                 strong Default:&nbsp;
-        //-                 span= param.default
-        //-             | &nbsp;
-        //-         //- examples for enums
-        //-         span.text-muted.example
-        //-             strong Example:&nbsp;
-        //-             +Example(param)
-        //-         if param.meta && param.meta.description
-        //-             != self.markdown(param.meta.description)
-        //-         if param.content.value.element == 'enum'
-        //-             p.choices
-        //-                 strong Choices:&nbsp;
-        //-                 each value in param.content.value.content
-        //-                     code= self.urldec(value.content)
-        //-                     = ' '
-        //-         if param.content.value.element == 'array'
-        //-             p.choices
-        //-                 strong Elements:&nbsp;
-        //-                 if param.content.value.content
-        //-                     each value in param.content.value.content
-        //-                         code= self.urldec(value.element)
-        //-                         = ' '
 
 mixin AttributeObject(dataStructure, prefix, level, parent)
       if dataStructure.element == 'member'
@@ -238,7 +202,6 @@ mixin AttributeObject(dataStructure, prefix, level, parent)
           else if dataStructure.content.value.element == 'array'
               +AttributeObject(dataStructure.content.value, prefix, level + 1, dataStructure)        
           else if dataStructure.content.value.element == 'enum'
-              - console.log(JSON.stringify(dataStructure, null, 2))
               +AttributeElement(dataStructure.content.value, prefix, level + 1, dataStructure)        
           else
               - console.log(JSON.stringify(dataStructure, null, 2))
@@ -274,6 +237,12 @@ mixin AttributeElement(dataStructure, prefix)
             | &nbsp;
             span.text-muted.example
                 +ExampleTemplate(dataStructure)
+                if dataStructure.content.value.element == 'enum'
+                    p.choices
+                        strong Choices:&nbsp;
+                        each element in dataStructure.content.value.content
+                            code= self.urldec(element.content)
+                            = ' '
             if dataStructure.meta && dataStructure.meta.description
                 !=self.markdown(dataStructure.meta.description)
             else
