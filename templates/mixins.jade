@@ -155,11 +155,11 @@ mixin CurlObject(field, object)
             br
             |&nbsp;&nbsp;&nbsp;&nbsp;--data "#{field}[#{member.content.key.content}]=#{member.content.value.content}"
 
-mixin Attributes(params, contentType)
+mixin Attributes(params, contentType, title)
     //- Draw a definition list of attribute names, types, defaults,
     //- examples and descriptions.
     .title
-        strong Request Attributes
+        strong #{title}
         if contentType
             | &nbsp; (#{contentType})
         .collapse-button.show
@@ -235,7 +235,7 @@ mixin RequestResponse(title, request, collapse)
                 span.open Show
     +RequestResponseBody(request, collapse)
 
-mixin RequestResponseBody(request, collapse, showBlank)
+mixin RequestResponseBody(request, collapse, showBlank, showAttributes)
     if request.hasContent || showBlank
         div(class=collapse ? 'collapse-content' : ''): .inner
             if request.description
@@ -254,6 +254,9 @@ mixin RequestResponseBody(request, collapse, showBlank)
                 pre: code
                     != self.highlight(request.body, null, ['json', 'yaml', 'xml', 'javascript'])
                 div(style="height: 1px;")
+            if showAttributes
+                if request.content && request.content.length > 0 && request.content[0].element == 'dataStructure' && request.content[0].content
+                    +Attributes(request.content[0].content[0].content, null, 'Response Attributes')
             if request.schema
                 h5 Schema
                 pre: code
@@ -357,7 +360,13 @@ mixin ContentTriple()
                         a.permalink(href=resource.elementLink) &para;
                     if resource.description
                         != self.markdown(resource.description)
-
+            each dataStructure in resource.content
+                if dataStructure.element == 'dataStructure' 
+                    each object in dataStructure.content
+                        if object.element == 'object'
+                            .middle
+                                .action
+                                    +Attributes(object.content, null, 'Resource Model')
             each action in resource.actions || []
                 if action.examples
                     .right
@@ -384,7 +393,7 @@ mixin ContentTriple()
                                               .tab
                                                   +CurlTemplate(request, action.method, self.api)
                                               .tab
-                                                  +RequestResponseBody(request, false, true)
+                                                  +RequestResponseBody(request, false, true, false)
                                               h4 Example Response
                                               .tabs
                                                   .tab-names
@@ -392,7 +401,7 @@ mixin ContentTriple()
                                                           span.tab-button= response.name
                                                   each response in example.responses
                                                       .tab
-                                                          +RequestResponseBody(response, false, true)
+                                                          +RequestResponseBody(response, false, true, true)
                       else
                           .tabs
                             each example in action.examples
@@ -415,7 +424,7 @@ mixin ContentTriple()
                             != self.markdown(action.description)
 
                         if action.attributes.length
-                            +Attributes(action.attributes, action.request.contentType)
+                            +Attributes(action.attributes, action.request.contentType, 'Request Attributes')
 
                         //- A list of sub-sections for parameters, requests
                         //- and responses.
