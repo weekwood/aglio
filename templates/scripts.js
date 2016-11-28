@@ -48,6 +48,10 @@ function toggleCollapseButton(event) {
     var content = button.parentNode.nextSibling;
     var inner = content.children[0];
 
+    if(!inner) {
+      return
+    };
+
     if (button.className.indexOf('collapse-button') === -1) {
       // Clicked without hitting the right element?
       return;

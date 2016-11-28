@@ -113,7 +113,7 @@ mixin Parameters(params)
                             code= self.urldec(value.value)
                             = ' '
 
-mixin CurlTemplate(action, method, api)
+mixin CurlTemplate(request, action, api)
     - var actionName = 'curl-' + action.elementId
     div.curl
       div.command
@@ -124,36 +124,56 @@ mixin CurlTemplate(action, method, api)
             if api.curlOptions
                 br
                 |&nbsp;&nbsp;&nbsp;&nbsp;#{api.curlOptions}
-            if method != 'GET'
+            if action.method != 'GET'
                 br
-                |&nbsp;&nbsp;&nbsp;&nbsp;--request #{method}
-            if action.authorization
+                |&nbsp;&nbsp;&nbsp;&nbsp;--request #{action.method}
+            if request.authorization
                 br
-                if action.authorization.usernamepassword
-                    |&nbsp;&nbsp;&nbsp;&nbsp;--user #{action.authorization.usernamepassword}
+                if request.authorization.usernamepassword
+                    |&nbsp;&nbsp;&nbsp;&nbsp;--user #{request.authorization.usernamepassword}
                 else
-                    |&nbsp;&nbsp;&nbsp;&nbsp;--header "Authorization: #{action.authorization.raw}"
-            each dataStructure in action.content
+                    |&nbsp;&nbsp;&nbsp;&nbsp;--header "Authorization: #{request.authorization.raw}"
+            each dataStructure in request.content
                 if dataStructure.element == 'dataStructure'
-                    each attribute in dataStructure.content[0].content
-                        if attribute.content
-                            if attribute.content.value.element == 'object'
-                                if attribute.content.value && attribute.content.value.content
-                                    +CurlObject(attribute.content.key.content, attribute.content.value.content)
-                                    |"                    
-                            else
-                                br
-                                |&nbsp;&nbsp;&nbsp;&nbsp;--data-urlencode #{attribute.content.key.content}="
-                                +Example(attribute)
-                                |"
+                    each content in dataStructure.content
+                        +CurlObject(content, '', 0)
       div.copy
           button(onclick='copyToClipboardWithoutNewlines(\'#{actionName}\')') copy curl command
 
-mixin CurlObject(field, object)
-    each member in object
-        if member.content.value.element == 'string'
-            br
-            |&nbsp;&nbsp;&nbsp;&nbsp;--data "#{field}[#{member.content.key.content}]=#{member.content.value.content}"
+mixin CurlObject(dataStructure, prefix, level)
+      if dataStructure.element == 'member'
+          if level > 1
+              - prefix = prefix + "["
+          - prefix = prefix + dataStructure.content.key.content
+          if level > 1
+              - prefix = prefix + "]"          
+          if dataStructure.content.value.element == 'string' || dataStructure.content.value.element == 'number' || dataStructure.content.value.element == 'boolean' || dataStructure.content.value.element == 'enum'
+              br
+              |&nbsp;&nbsp;&nbsp;&nbsp;--data-urlencode "#{prefix}=
+              +Example(dataStructure)
+              |"
+          else if dataStructure.content.value.element == 'object'
+              +CurlObject(dataStructure.content.value, prefix, level + 1)
+          else if dataStructure.content.value.element == 'array'
+              +CurlObject(dataStructure.content.value, prefix, level + 1)        
+          else
+              //- - console.log(JSON.stringify(dataStructure.content, null, 2))
+              //- - throw 'Could not process element'      
+      else if dataStructure.element == 'object'
+          each member in dataStructure.content
+              +CurlObject(member, prefix, level + 1)
+      else if dataStructure.element == 'array'
+          each member, index in dataStructure.content
+              - arrayPrefix = prefix + "[" + index + "]"
+              +CurlObject(member, arrayPrefix, level + 1)
+      else if dataStructure.element == 'string' || dataStructure.element == 'number'
+          br
+          |&nbsp;&nbsp;&nbsp;&nbsp;--data-urlencode "#{prefix}[]=
+          !=dataStructure.content
+          |"
+      else
+          - console.log(JSON.stringify(dataStructure, null, 2))
+          - throw 'Could not process element'
 
 mixin Attributes(params, contentType, title)
     //- Draw a definition list of attribute names, types, defaults,
@@ -166,61 +186,126 @@ mixin Attributes(params, contentType, title)
             span.close Hide
             span.open Show
     .collapse-content
-        dl.inner: each param in params || []
-            dt= self.urldec(param.content.key.content)
-            dd
-                code= param.content.value.element || 'string'
+        //- - console.log(JSON.stringify(params,null,2))
+        dl.inner
+            each param in params
+                +AttributeObject(param, '', 0)
+        //- dl.inner: each param in params || []
+        //-     dt= self.urldec(param.content.key.content)
+        //-     dd
+        //-         code= param.content.value.element || 'string'
+        //-         | &nbsp;
+        //-         
+        //-         if param.attributes && param.attributes.typeAttributes.indexOf('required') > -1
+        //-             span.required (required)
+        //-         else
+        //-             span (optional)
+        //-         | &nbsp;
+        //-         if param.default
+        //-             span.text-info.default
+        //-                 strong Default:&nbsp;
+        //-                 span= param.default
+        //-             | &nbsp;
+        //-         //- examples for enums
+        //-         span.text-muted.example
+        //-             strong Example:&nbsp;
+        //-             +Example(param)
+        //-         if param.meta && param.meta.description
+        //-             != self.markdown(param.meta.description)
+        //-         if param.content.value.element == 'enum'
+        //-             p.choices
+        //-                 strong Choices:&nbsp;
+        //-                 each value in param.content.value.content
+        //-                     code= self.urldec(value.content)
+        //-                     = ' '
+        //-         if param.content.value.element == 'array'
+        //-             p.choices
+        //-                 strong Elements:&nbsp;
+        //-                 if param.content.value.content
+        //-                     each value in param.content.value.content
+        //-                         code= self.urldec(value.element)
+        //-                         = ' '
+
+mixin AttributeObject(dataStructure, prefix, level, parent)
+      if dataStructure.element == 'member'
+          if level > 1
+              - prefix = prefix + ".<wbr>"
+          - prefix = prefix + dataStructure.content.key.content
+          if dataStructure.content.value.element == 'string' || dataStructure.content.value.element == 'number' || dataStructure.content.value.element == 'boolean' || dataStructure.content.value.element == 'enum'
+              +AttributeElement(dataStructure, prefix)
+          else if dataStructure.content.value.element == 'object'
+              +AttributeObject(dataStructure.content.value, prefix, level + 1, dataStructure)
+          else if dataStructure.content.value.element == 'array'
+              +AttributeObject(dataStructure.content.value, prefix, level + 1, dataStructure)        
+          else if dataStructure.content.value.element == 'enum'
+              - console.log(JSON.stringify(dataStructure, null, 2))
+              +AttributeElement(dataStructure.content.value, prefix, level + 1, dataStructure)        
+          else
+              - console.log(JSON.stringify(dataStructure, null, 2))
+              - throw 'Could not process element'      
+      else if dataStructure.element == 'object'
+          +AttributeElement(parent, prefix)          
+          each member in dataStructure.content
+              +AttributeObject(member, prefix, level + 1, dataStructure)
+      else if dataStructure.element == 'array'
+          +AttributeElement(parent, prefix)                    
+          - arrayPrefix = prefix + "[]"
+          +AttributeObject(dataStructure.content[0], arrayPrefix, level + 1, dataStructure)
+      else if dataStructure.element == 'string' || dataStructure.element == 'number'
+          br
+          |#{prefix}[]=
+          !=dataStructure.content
+      else
+          - console.log(JSON.stringify(dataStructure, null, 2))
+          - throw 'Could not process element'
+
+mixin AttributeElement(dataStructure, prefix)
+    if dataStructure.content.key
+        dt!= prefix
+        dd
+            if dataStructure.content.value
+                code= dataStructure.content.value.element || 'string'
                 | &nbsp;
-                
-                if param.attributes && param.attributes.typeAttributes.indexOf('required') > -1
+            span
+                if dataStructure.attributes && dataStructure.attributes.typeAttributes.indexOf('required') > -1
                     span.required (required)
                 else
                     span (optional)
-                | &nbsp;
-                if param.default
-                    span.text-info.default
-                        strong Default:&nbsp;
-                        span= param.default
-                    | &nbsp;
-                //- examples for enums
-                span.text-muted.example
-                    strong Example:&nbsp;
-                    +Example(param)
-                if param.meta && param.meta.description
-                    != self.markdown(param.meta.description)
-                if param.content.value.element == 'enum'
-                    p.choices
-                        strong Choices:&nbsp;
-                        each value in param.content.value.content
-                            code= self.urldec(value.content)
-                            = ' '
-                if param.content.value.element == 'array'
-                    p.choices
-                        strong Elements:&nbsp;
-                        each value in param.content.value.content
-                            code= self.urldec(value.element)
-                            = ' '
+            | &nbsp;
+            span.text-muted.example
+                +ExampleTemplate(dataStructure)
+            if dataStructure.meta && dataStructure.meta.description
+                !=self.markdown(dataStructure.meta.description)
+            else
+                p
+
+mixin ExampleTemplate(param)
+    if param.content.value && param.content.value.element != 'array' && param.content.value.element != 'object'
+        strong Example:&nbsp;
+        +Example(param)
 
 mixin Example(param)
-    if param.content.value.element == 'enum'
-        span= param.content.value.content[0].content
-    else if param.content.value.element == 'array'
-        span= '['
-            each value, index in param.content.value.content
-                | #{self.urldec(value.element)}
-                if index < Object.keys(param.content.value.content).length - 1
-                    |,
-            |]
-    else if param.content.value.element == 'object'
-        if param.content.value.content
-            span
-                each member, index in param.content.value.content
-                    if member.content.value.element == 'string'
-                        |[#{member.content.key.content}]=#{member.content.value.content}
-                        if index < Object.keys(param.content.value.content).length - 1
-                            |,
-    else if param.content.value.content
-        span= param.content.value.content
+    if param.content.value
+        if param.content.value.element == 'enum'
+            span= param.content.value.content[0].content
+        else if param.content.value.element == 'array'
+            //- span= '['
+            //-     if param.content.value.content
+            //-         each value, index in param.content.value.content
+            //-             | #{self.urldec(value.element)}
+            //-             if index < Object.keys(param.content.value.content).length - 1
+            //-                 |,
+            //-         |]
+        else if param.content.value.element == 'object'
+            //- if param.content.value.content
+            //-     span
+            //-         each member, index in param.content.value.content
+            //-             if member.content.value.element == 'string'
+            //-                 |[#{member.content.key.content}]=#{member.content.value.content}
+            //-                 if index < Object.keys(param.content.value.content).length - 1
+            //-                     |,
+        else if param.content.value.content
+            span= param.content.value.content
 
 mixin RequestResponse(title, request, collapse)
     .title
@@ -256,7 +341,7 @@ mixin RequestResponseBody(request, collapse, showBlank, showAttributes)
                 div(style="height: 1px;")
             if showAttributes
                 if request.content && request.content.length > 0 && request.content[0].element == 'dataStructure' && request.content[0].content
-                    +Attributes(request.content[0].content[0].content, null, 'Response Attributes')
+                    //- +Attributes(request.content[0].content[0].content, null, 'Response Attributes')
             if request.schema
                 h5 Schema
                 pre: code
@@ -391,7 +476,7 @@ mixin ContentTriple()
                                                   span.tab-button
                                                       |details
                                               .tab
-                                                  +CurlTemplate(request, action.method, self.api)
+                                                  +CurlTemplate(request, action, self.api)
                                               .tab
                                                   +RequestResponseBody(request, false, true, false)
                                               h4 Example Response
