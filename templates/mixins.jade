@@ -145,7 +145,6 @@ mixin CurlTemplate(request, action, api)
             each dataStructure in request.content
                 if dataStructure.element == 'dataStructure'
                     each content in dataStructure.content
-                        - console.log(JSON.stringify(request, null, 2))
                         +CurlJsonBody(request.body)
                         //- +CurlObject(content, '', 0)
       div.copy
