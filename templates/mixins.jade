@@ -1,3 +1,5 @@
+include scripts.js
+
 script.
   function copyToClipboardWithoutNewlines(elementId) {
     var aux = document.createElement("input");
@@ -12,6 +14,11 @@ script.
     var buf = Buffer.from(b64string, 'base64');
     return buf.toString();
   }
+  
+mixin slugify(text)
+  .name
+    != text
+    a.permalink(href=text.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '')) &para;
 
 mixin Badge(method)
     //- Draw a badge for a given HTTP method
@@ -224,7 +231,8 @@ mixin AttributeObject(dataStructure, prefix, level, parent)
 
 mixin AttributeElement(dataStructure, prefix)
     if dataStructure.content.key
-        dt!= prefix
+        dt
+          code!= prefix
         dd
             if dataStructure.content.value
                 code= dataStructure.content.value.element || 'string'
@@ -310,7 +318,7 @@ mixin RequestResponseBody(request, collapse, showBlank, showAttributes)
                 div(style="height: 1px;")
             if showAttributes
                 if request.content && request.content.length > 0 && request.content[0].element == 'dataStructure' && request.content[0].content
-                    //- +Attributes(request.content[0].content[0].content, null, 'Response Attributes')
+                    +Attributes(request.content[0].content[0].content, null, 'Response Attributes')
             if request.schema
                 h5 Schema
                 pre: code
@@ -358,7 +366,7 @@ mixin Content()
                     each action in resource.actions || []
                         .action(class=action.methodLower, id=action.elementId)
                             h4.action-heading
-                                .name!= action.name
+                                a.name!= action.name
                                 a.method(class=action.methodLower, href=action.elementLink)
                                     = action.method
                                 code.uri= self.urldec(action.uriTemplate)
@@ -470,7 +478,7 @@ mixin ContentTriple()
                 .middle
                     .action(class=action.methodLower, id=action.elementId)
                         h4.action-heading
-                            .name!= action.name
+                            +slugify(action.name)
                             a.method(class=action.methodLower, href=action.elementLink)
                                 = action.method
                             code.uri= self.urldec(action.uriTemplate)
