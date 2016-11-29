@@ -14,9 +14,10 @@ script.
   }
   
 mixin slugify(text)
-  .name
-    != text
-    a.permalink(href=text.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '')) &para;
+    .name
+        != text + '&nbsp;'
+        - slug = text.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '')
+        a.permalink(href='#' + slug, id=slug) &para;
 
 mixin Badge(method)
     //- Draw a badge for a given HTTP method
@@ -127,23 +128,40 @@ mixin CurlTemplate(request, action, api)
             != action.colorizedUriTemplate
             |'&nbsp;
             if api.curlOptions
+                |&nbsp;\
                 br
-                |&nbsp;&nbsp;&nbsp;&nbsp;#{api.curlOptions}
+                |#{api.curlOptions}
             if action.method != 'GET'
+                |&nbsp;\
                 br
-                |&nbsp;&nbsp;&nbsp;&nbsp;--request #{action.method}
+                |--request #{action.method}
             if request.authorization
+                |&nbsp;\
                 br
                 if request.authorization.usernamepassword
-                    |&nbsp;&nbsp;&nbsp;&nbsp;--user #{request.authorization.usernamepassword}
+                    |--user #{request.authorization.usernamepassword}
                 else
-                    |&nbsp;&nbsp;&nbsp;&nbsp;--header "Authorization: #{request.authorization.raw}"
+                    |--header "Authorization: #{request.authorization.raw}"
             each dataStructure in request.content
                 if dataStructure.element == 'dataStructure'
                     each content in dataStructure.content
-                        +CurlObject(content, '', 0)
+                        - console.log(JSON.stringify(request, null, 2))
+                        +CurlJsonBody(request.body)
+                        //- +CurlObject(content, '', 0)
       div.copy
           button(onclick='copyToClipboardWithoutNewlines(\'#{actionName}\')') copy curl command
+
+mixin CurlJsonBody(jsonBody)
+    |&nbsp;\
+    br
+    |-H "Content-Type: application/json" &nbsp;\
+    br
+    |-d @- << EOF
+    br
+    - jsonBody = jsonBody.replace(/(?:\r\n|\r|\n)/g, '<br />');
+    !=jsonBody
+    br
+    |EOF
 
 mixin CurlObject(dataStructure, prefix, level)
       if dataStructure.element == 'member'
@@ -162,23 +180,36 @@ mixin CurlObject(dataStructure, prefix, level)
           else if dataStructure.content.value.element == 'array'
               +CurlObject(dataStructure.content.value, prefix, level + 1)        
           else
-              //- - console.log(JSON.stringify(dataStructure.content, null, 2))
-              //- - throw 'Could not process element'      
+              - console.log(JSON.stringify(dataStructure.content, null, 2))
+              - console.log(prefix)              
+              - throw 'Could not process element (CurlObject::member)'
       else if dataStructure.element == 'object'
           each member in dataStructure.content
               +CurlObject(member, prefix, level + 1)
       else if dataStructure.element == 'array'
           each member, index in dataStructure.content
-              - arrayPrefix = prefix + "[" + index + "]"
-              +CurlObject(member, arrayPrefix, level + 1)
-      else if dataStructure.element == 'string' || dataStructure.element == 'number'
+              if member.element == 'member'
+                  - arrayPrefix = prefix + "[" + index + "]"
+                  +CurlObject(member, arrayPrefix, level + 1)
+              else if member.element == 'enum'
+                  each element, index2 in member.content
+                      - arrayPrefix = prefix + "[" + index2 + "]"
+                      +CurlObject(element, arrayPrefix, level + 1)
+      else if dataStructure.element == 'string' || dataStructure.element == 'number' || dataStructure.element == 'boolean'
           br
-          |&nbsp;&nbsp;&nbsp;&nbsp;--data-urlencode "#{prefix}[]=
+          |&nbsp;&nbsp;&nbsp;&nbsp;--data-urlencode "#{prefix}=
           !=dataStructure.content
           |"
+      else if dataStructure.element == 'enum'
+          each content in dataStructure.content
+                br
+                |&nbsp;&nbsp;&nbsp;&nbsp;--data-urlencode "#{prefix}=
+                !=content.content
+                |"
       else
           - console.log(JSON.stringify(dataStructure, null, 2))
-          - throw 'Could not process element'
+          - console.log(prefix)
+          - throw 'Could not process element (CurlObject::outer)'
 
 mixin Attributes(params, contentType, title)
     //- Draw a definition list of attribute names, types, defaults,
@@ -210,7 +241,8 @@ mixin AttributeObject(dataStructure, prefix, level, parent)
               +AttributeElement(dataStructure.content.value, prefix, level + 1, dataStructure)        
           else
               - console.log(JSON.stringify(dataStructure, null, 2))
-              - throw 'Could not process element'      
+              - console.log(prefix)
+              - throw 'Could not process element (AttributeObject::member)'      
       else if dataStructure.element == 'object'
           +AttributeElement(parent, prefix)          
           each member in dataStructure.content
@@ -219,18 +251,19 @@ mixin AttributeObject(dataStructure, prefix, level, parent)
           +AttributeElement(parent, prefix)                    
           - arrayPrefix = prefix + "[]"
           +AttributeObject(dataStructure.content[0], arrayPrefix, level + 1, dataStructure)
-      else if dataStructure.element == 'string' || dataStructure.element == 'number'
-          br
-          |#{prefix}[]=
-          !=dataStructure.content
+      else if dataStructure.element == 'enum'
+          +AttributeElement(parent, prefix)
+      else if dataStructure.element == 'string' || dataStructure.element == 'number' || dataStructure.element == 'boolean'
+          +AttributeElement(parent, prefix)
       else
           - console.log(JSON.stringify(dataStructure, null, 2))
-          - throw 'Could not process element'
+          - console.log(prefix)
+          - throw 'Could not process element (AttributeObject::outer)'
 
 mixin AttributeElement(dataStructure, prefix)
     if dataStructure.content.key
         dt
-          code!= prefix
+            code!= prefix
         dd
             if dataStructure.content.value
                 code= dataStructure.content.value.element || 'string'
@@ -244,15 +277,29 @@ mixin AttributeElement(dataStructure, prefix)
             span.text-muted.example
                 +ExampleTemplate(dataStructure)
                 if dataStructure.content.value.element == 'enum'
-                    p.choices
-                        strong Choices:&nbsp;
-                        each element in dataStructure.content.value.content
-                            code= self.urldec(element.content)
-                            = ' '
+                    +AttributeEnum(dataStructure.content.value.content)
+                else if dataStructure.content.value.element == 'array'
+                    +AttributeArray(dataStructure.content.value.content)
             if dataStructure.meta && dataStructure.meta.description
                 !=self.markdown(dataStructure.meta.description)
             else
                 p
+
+mixin AttributeEnum(enumeration)
+    p.choices
+        strong Choices:&nbsp;
+        each element in enumeration
+            code= self.urldec(element.content)
+            = ' '
+            
+mixin AttributeArray(content)
+    each element in content
+        if element.element == 'enum'
+            p.choices
+                strong May Contain:&nbsp;
+                each value in element.content
+                  code= self.urldec(value.content)
+                  = ' '            
 
 mixin ExampleTemplate(param)
     if param.content.value && param.content.value.element != 'array' && param.content.value.element != 'object'
@@ -483,6 +530,9 @@ mixin ContentTriple()
                         if action.description
                             != self.markdown(action.description)
 
+                        //- - console.log(action.name)
+                        if action.name == 'Add a user payment method'
+                            //- - console.log(JSON.stringify(action, null, 2))
                         if action.attributes.length
                             +Attributes(action.attributes, action.request.contentType, 'Request Attributes')
 

@@ -433,25 +433,22 @@ decorate = (api, md, slugCache, verbose) ->
                           (header.value.split 'Basic ' )[1],
                           'base64'
                         ).toString('ascii')
-              # If there is no schema, but there are MSON attributes, then try
-              # to generate the schema. This will fail sometimes.
-              # TODO: Remove me when Drafter is released.
-              if not item.schema and item.content
-                for dataStructure in item.content
-                  if dataStructure.element is 'dataStructure'
-                    if name is 'requests'
-                      action.attributes = dataStructure.content[0].content
-                    try
-                      schema = renderSchema(
-                        dataStructure.content[0], dataStructures)
-                      schema['$schema'] =
-                        'http://json-schema.org/draft-04/schema#'
-                      item.schema = JSON.stringify(schema, null, 2)
-                    catch err
-                      if verbose
-                        console.log(
-                          JSON.stringify dataStructure.content[0], null, 2)
-                        console.log(err)
+
+              for dataStructure in item.content
+                if dataStructure.element is 'dataStructure'
+                  if name is 'requests'
+                    action.attributes = dataStructure.content[0].content
+                  try
+                    schema = renderSchema(
+                      dataStructure.content[0], dataStructures)
+                    schema['$schema'] =
+                      'http://json-schema.org/draft-04/schema#'
+                    item.schema = JSON.stringify(schema, null, 2)
+                  catch err
+                    if verbose
+                      console.log(
+                        JSON.stringify dataStructure.content[0], null, 2)
+                      console.log(err)
 
               if item.content and not process.env.DRAFTER_EXAMPLES
                 for dataStructure in item.content
