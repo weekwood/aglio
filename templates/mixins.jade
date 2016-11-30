@@ -432,6 +432,20 @@ mixin Content()
                             if action.examples
                                 +Examples(resourceGroup, resource, action)
 
+mixin TopBarTriple()
+    .topbar
+        .nav-background
+        .container-fluid.triple
+            .row
+                .content
+                    .middle
+                    .right
+                        .menu
+                            .tab-button.active(tab-toggle='curl', tab-toggle-group='examples')
+                                |curl
+                            .tab-button(tab-toggle='details', tab-toggle-group='examples')
+                                |details
+
 mixin ContentTriple()
     .middle
         //- Page header and API description
@@ -491,14 +505,9 @@ mixin ContentTriple()
                                   each request in example.requests
                                       .tab
                                           .tabs
-                                              .tab-names
-                                                  span.tab-button
-                                                      |curl
-                                                  span.tab-button
-                                                      |details
-                                              .tab
+                                              .tab.curl(tab-toggle-name='curl', tab-toggle-group='examples')
                                                   +CurlTemplate(request, action, self.api)
-                                              .tab
+                                              .tab.details(tab-toggle-name='details', tab-toggle-group='examples')
                                                   +RequestResponseBody(request, false, true, false)
                                               h4 Example Response
                                               .tabs

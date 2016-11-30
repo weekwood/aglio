@@ -69,28 +69,30 @@ function toggleCollapseButton(event) {
 }
 
 function toggleTabButton(event) {
-    var i, index;
     var button = event.target;
+    var i = 0;
+    var name = button.getAttribute('tab-toggle');
+    var group = button.getAttribute('tab-toggle-group');
 
-    // Get index of the current button.
-    var buttons = childrenByClass(button.parentNode, 'tab-button');
-    for (i = 0; i < buttons.length; i++) {
-        if (buttons[i] === button) {
-            index = i;
-            button.className = 'tab-button active';
-        } else {
-            buttons[i].className = 'tab-button';
-        }
+    var tabs = document.querySelectorAll('.tab-button[tab-toggle-group="' + group + '"]');
+    [].forEach.call(tabs, function(el) {
+        el.className = el.className.replace(/\bactive\b/, "");
+    });
+
+    var tabs = document.querySelectorAll('.tab[tab-toggle-group="' + group + '"]');
+    for (i = 0; i < tabs.length; i++) {
+            tabs[i].style.display = 'none';
     }
 
-    // Hide other tabs and show this one.
-    var tabs = childrenByClass(button.parentNode.parentNode, 'tab');
+    var tabs = document.querySelectorAll('.tab-button[tab-toggle="' + name + '"][tab-toggle-group="' + group + '"]');
     for (i = 0; i < tabs.length; i++) {
-        if (i === index) {
+            tabs[i].className += ' active';
+    }
+
+
+    var tabs = document.querySelectorAll('.tab[tab-toggle-name="' + name + '"][tab-toggle-group="' + group + '"]');
+    for (i = 0; i < tabs.length; i++) {
             tabs[i].style.display = 'block';
-        } else {
-            tabs[i].style.display = 'none';
-        }
     }
 }
 
@@ -193,18 +195,21 @@ function init() {
         }
     }
 
-    var responseCodes = document.querySelectorAll('.tab-names');
-    for (i = 0; i < responseCodes.length; i++) {
-        var tabButtons = childrenByClass(responseCodes[i], 'tab-button');
-        for (j = 0; j < tabButtons.length; j++) {
-            tabButtons[j].onclick = toggleTabButton;
+    var tabButtons = document.querySelectorAll('.tab-button');
+    for (j = 0; j < tabButtons.length; j++) {
+        tabButtons[j].onclick = toggleTabButton;
 
-            // Show by default?
-            if (j === 0) {
-                toggleTabButton({target: tabButtons[j]});
-            }
+        // Show by default?
+        if (tabButtons[j].hasC === 0) {
+            toggleTabButton({target: tabButtons[j]});
         }
     }
+
+    tabButtons = document.querySelectorAll('.tab-button.active');
+    for (j = 0; j < tabButtons.length; j++) {
+            toggleTabButton({target: tabButtons[j]});
+    }
+
 
     // Make nav items clickable to collapse/expand their content.
     var navItems = document.querySelectorAll('nav .resource-group .heading');

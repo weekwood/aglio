@@ -1,6 +1,6 @@
 {
   "name": "aglio-theme-w00tw00t",
-  "version": "2.0.8",
+  "version": "2.0.9",
   "description": "Theme with some fixes for the Aglio API Blueprint renderer",
   "main": "lib/main.js",
   "scripts": {
