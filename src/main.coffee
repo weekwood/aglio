@@ -349,7 +349,8 @@ decorate = (api, md, slugCache, verbose) ->
       api.curlHost = meta.value
     if meta.name is 'CURL_OPTIONS'
       api.curlOptions = meta.value
-
+    if meta.name is 'ATTRIBUTE_LEVELS'
+      api.maxAttributeLevel = meta.value
   if not api.curlHost
     api.curlHost = api.host
   if not api.curlHost
@@ -367,6 +368,26 @@ decorate = (api, md, slugCache, verbose) ->
       slugCache._nav = []
 
     for resource in resourceGroup.resources or []
+      resource.model = {}
+      for item in resource.content or []
+        if item.element is 'dataStructure'
+          dataStructure = item.content[0]
+          for content in item.content[0].content
+            name = content.content.key.content
+            resource.model[name] = {}
+            resource.model[name].schema = JSON.stringify(
+              renderSchema(content.content.value, dataStructures),
+                null,
+                2
+              )
+            resource.model[name].body = JSON.stringify(
+              renderExample(content.content.value, dataStructures),
+                null,
+                2
+              )
+            if content.meta && content.meta.description
+              resource.model[name].description = content.meta.description
+
       # Element ID and link
       resource.elementId = slugify(
         "#{resourceGroup.name}-#{resource.name}", true)

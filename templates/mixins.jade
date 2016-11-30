@@ -210,100 +210,98 @@ mixin CurlObject(dataStructure, prefix, level)
           - console.log(prefix)
           - throw 'Could not process element (CurlObject::outer)'
 
-mixin Attributes(params, contentType, title)
-    //- Draw a definition list of attribute names, types, defaults,
-    //- examples and descriptions.
-    .title
-        strong #{title}
-        if contentType
-            | &nbsp; (#{contentType})
-        .collapse-button.show
-            span.close Hide
-            span.open Show
-    .collapse-content
-        dl.inner
-            each param in params
-                +AttributeObject(param, '', 0)
+mixin Attributes(schema, body, contentType, title, showRequired)
+    if schema && body
+        .title
+            strong #{title}
+            if contentType
+                | &nbsp; (#{contentType})
+            .collapse-button.show
+                span.close Hide
+                span.open Show
+        .collapse-content
+            dl.inner
+                +AttributeObject(JSON.parse(schema), JSON.parse(body), '', 0, showRequired)
 
-mixin AttributeObject(dataStructure, prefix, level, parent)
-      if dataStructure.element == 'member'
-          if level > 1
-              - prefix = prefix + ".<wbr>"
-          - prefix = prefix + dataStructure.content.key.content
-          if dataStructure.content.value.element == 'string' || dataStructure.content.value.element == 'number' || dataStructure.content.value.element == 'boolean' || dataStructure.content.value.element == 'enum'
-              +AttributeElement(dataStructure, prefix)
-          else if dataStructure.content.value.element == 'object'
-              +AttributeObject(dataStructure.content.value, prefix, level + 1, dataStructure)
-          else if dataStructure.content.value.element == 'array'
-              +AttributeObject(dataStructure.content.value, prefix, level + 1, dataStructure)        
-          else if dataStructure.content.value.element == 'enum'
-              +AttributeElement(dataStructure.content.value, prefix, level + 1, dataStructure)        
-          else
-              - console.log(JSON.stringify(dataStructure, null, 2))
-              - console.log(prefix)
-              - throw 'Could not process element (AttributeObject::member)'      
-      else if dataStructure.element == 'object'
-          +AttributeElement(parent, prefix)          
-          each member in dataStructure.content
-              +AttributeObject(member, prefix, level + 1, dataStructure)
-      else if dataStructure.element == 'array'
-          +AttributeElement(parent, prefix)                    
-          - arrayPrefix = prefix + "[]"
-          +AttributeObject(dataStructure.content[0], arrayPrefix, level + 1, dataStructure)
-      else if dataStructure.element == 'enum'
-          +AttributeElement(parent, prefix)
-      else if dataStructure.element == 'string' || dataStructure.element == 'number' || dataStructure.element == 'boolean'
-          +AttributeElement(parent, prefix)
-      else
-          - console.log(JSON.stringify(dataStructure, null, 2))
-          - console.log(prefix)
-          - throw 'Could not process element (AttributeObject::outer)'
+mixin AttributeObject(schema, body, prefix, level, parent, required, showRequired)
+    if !self.api.maxAttributeLevel || level <= self.api.maxAttributeLevel
+        if schema.type == 'object'
+            each property, name in schema.properties
+                - var propertyPrefix = prefix
+                if level > 0
+                    - propertyPrefix = propertyPrefix + '.<wbr >'
+                - propertyPrefix = propertyPrefix + name
+                - var required = schema.required ? schema.required.indexOf(name) > -1 : false       
+                if body
+                    - var propertyBody = body[name]
+                else 
+                    - var propertyBody = null
+                if property.type == 'object' || property.type == 'array' 
+                    +AttributeElement(property, propertyBody, propertyPrefix, schema, required, showRequired)
+                    +AttributeObject(property, propertyBody, propertyPrefix, level + 1, schema, required, showRequired)
+                else
+                    +AttributeObject(property, propertyBody, propertyPrefix, level, schema, required, showRequired)
+        else if schema.type == 'array'
+                - var itemPrefix = prefix
+                if level == 0
+                    - itemPrefix = itemPrefix + '.<wbr >'
+                - itemPrefix = itemPrefix + '[]<wbr >'
+                if schema.items.type
+                    +AttributeObject(schema.items, body[0], itemPrefix, level + 1, schema, required, showRequired)
+                //- else
+                    //- +AttributeElement(schema, body, itemPrefix, required, showRequired)
+        else
+            +AttributeElement(schema, body, prefix, required, showRequired)
 
-mixin AttributeElement(dataStructure, prefix)
-    if dataStructure.content.key
+mixin AttributeElement(schema, body, prefix, required, showRequired)
         dt
             code!= prefix
         dd
-            if dataStructure.content.value
-                code= dataStructure.content.value.element || 'string'
-                | &nbsp;
-            span
-                if dataStructure.attributes && dataStructure.attributes.typeAttributes.indexOf('required') > -1
+            code= schema.type || 'string'
+            | &nbsp;
+            if showRequired
+                if required
                     span.required (required)
                 else
                     span (optional)
-            | &nbsp;
+                | &nbsp;
             span.text-muted.example
-                +ExampleTemplate(dataStructure)
-                if dataStructure.content.value.element == 'enum'
-                    +AttributeEnum(dataStructure.content.value.content)
-                else if dataStructure.content.value.element == 'array'
-                    +AttributeArray(dataStructure.content.value.content)
-            if dataStructure.meta && dataStructure.meta.description
-                !=self.markdown(dataStructure.meta.description)
+                +ExampleTemplate(schema, body)
+            if schema.type == 'array'
+                +AttributeArray(schema)
+            else if schema.enum
+                +AttributeEnum(schema.enum)
+            if schema.description
+                !=self.markdown(schema.description)
             else
                 p
 
 mixin AttributeEnum(enumeration)
     p.choices
         strong Choices:&nbsp;
-        each element in enumeration
-            code= self.urldec(element.content)
+        each item in enumeration
+            code= self.urldec(item)
             = ' '
             
-mixin AttributeArray(content)
-    each element in content
-        if element.element == 'enum'
-            p.choices
-                strong May Contain:&nbsp;
-                each value in element.content
-                  code= self.urldec(value.content)
-                  = ' '            
+mixin AttributeArray(schema)
+    if schema.items.enum
+        p.choices
+            strong May Contain:&nbsp;
+            each value in schema.items.enum
+                if value.type != 'object'
+                    code= self.urldec(value)
+                    = ' '            
 
-mixin ExampleTemplate(param)
-    if param.content.value && param.content.value.element != 'array' && param.content.value.element != 'object'
-        strong Example:&nbsp;
-        +Example(param)
+mixin ExampleTemplate(schema, body)
+        if schema.type != 'object' && !(schema.type == 'array' && schema.items.type == 'object')
+            strong Example:&nbsp;
+            span
+                if schema.type == 'array'
+                  |[
+                  != body
+                  |]
+                else
+                  != body
 
 mixin Example(param)
     if param.content.value
@@ -341,7 +339,7 @@ mixin RequestResponse(title, request, collapse)
                 span.open Show
     +RequestResponseBody(request, collapse)
 
-mixin RequestResponseBody(request, collapse, showBlank, showAttributes)
+mixin RequestResponseBody(request, collapse, showBlank, showAttributes, showRequired)
     if request.hasContent || showBlank
         div(class=collapse ? 'collapse-content' : ''): .inner
             if request.description
@@ -360,10 +358,9 @@ mixin RequestResponseBody(request, collapse, showBlank, showAttributes)
                 pre: code
                     != self.highlight(request.body, null, ['json', 'yaml', 'xml', 'javascript'])
                 div(style="height: 1px;")
-            if showAttributes
-                if request.content && request.content.length > 0 && request.content[0].element == 'dataStructure' && request.content[0].content
-                    +Attributes(request.content[0].content[0].content, null, 'Response Attributes')
             if request.schema
+                if showAttributes
+                        +Attributes(request.schema, request.body, null, 'Response Attributes', showRequired)
                 h5 Schema
                 pre: code
                     != self.highlight(request.schema, null, ['json', 'yaml', 'xml'])
@@ -447,6 +444,8 @@ mixin TopBarTriple()
                                 |details
 
 mixin ContentTriple()
+    - var groupIndex = 0
+    - var tabIndex = 0
     .middle
         //- Page header and API description
         header
@@ -480,13 +479,21 @@ mixin ContentTriple()
                         a.permalink(href=resource.elementLink) &para;
                     if resource.description
                         != self.markdown(resource.description)
+                    .action
+                        each model, name in resource.model
+                            .title
+                                strong #{name}
+                            if model.description
+                                != self.markdown(model.description)
+                            +Attributes(model.schema, model.body, null, null, true)
+                            
             each dataStructure in resource.content
                 if dataStructure.element == 'dataStructure' 
                     each object in dataStructure.content
                         if object.element == 'object'
                             .middle
                                 .action
-                                    +Attributes(object.content, null, 'Resource Model')
+                                    //- +Attributes(object.content, null, 'Resource Model')
             each action in resource.actions || []
                 if action.examples
                     .right
@@ -494,13 +501,17 @@ mixin ContentTriple()
                       if action.hasRequest
                           h4 Example Request
                           .tabs
+                              - groupIndex++
                               .tab-names
                                   if action.examples.length > 1
                                       - var requestCount = 0
                                       each example in action.examples
-                                          each request in example.requests
+                                          each request, tabIndex in example.requests
                                               - requestCount++
-                                              span.tab-button= request.name || 'example ' + requestCount
+                                              - requestName = request.name || 'example ' + requestCount
+                                              - var active = tabIndex == 0 ? 'active' : ''
+                                              span.tab-button(class=active, tab-toggle='tab-' + tabIndex, tab-toggle-group=action.name + request.name)= requestName
+                                              - tabIndex++
                               each example in action.examples
                                   each request in example.requests
                                       .tab
@@ -512,10 +523,11 @@ mixin ContentTriple()
                                               h4 Example Response
                                               .tabs
                                                   .tab-names
-                                                      each response in example.responses
-                                                          span.tab-button= response.name
-                                                  each response in example.responses
-                                                      .tab
+                                                      each response, tabIndex in example.responses
+                                                          - var active = tabIndex == 0 ? 'active' : ''
+                                                          span.tab-button(class=active, tab-toggle='tab-' + tabIndex, tab-toggle-group=action.name + request.name)= response.name
+                                                  each response, tabIndex in example.responses
+                                                      .tab(tab-toggle-name='tab-' + tabIndex, tab-toggle-group=action.name + request.name)
                                                           +RequestResponseBody(response, false, true, true)
                       else
                           .tabs
@@ -541,8 +553,9 @@ mixin ContentTriple()
                         //- - console.log(action.name)
                         if action.name == 'Add a user payment method'
                             //- - console.log(JSON.stringify(action, null, 2))
-                        if action.attributes.length
-                            +Attributes(action.attributes, action.request.contentType, 'Request Attributes')
+                        if action.examples[0].requests && action.examples[0].requests[0]
+                            - request = action.examples[0].requests[0]
+                            +Attributes(request.schema, request.body, request.contentType, 'Request Attributes', true)
 
                         //- A list of sub-sections for parameters, requests
                         //- and responses.
