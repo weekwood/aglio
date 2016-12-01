@@ -125,7 +125,7 @@ mixin CurlTemplate(request, action, api)
         pre(id=actionName)
             |curl '#{api.curlHost}
             != action.colorizedUriTemplate
-            |'&nbsp;
+            |'
             if api.curlOptions
                 |&nbsp;\
                 br
@@ -152,7 +152,7 @@ mixin CurlTemplate(request, action, api)
 mixin CurlJsonBody(jsonBody)
     |&nbsp;\
     br
-    |-H "Content-Type: application/json" &nbsp;\
+    |-H 'Content-Type: application/json'&nbsp;\
     br
     |-d @- << EOF
     br
@@ -470,23 +470,28 @@ mixin ContentTriple()
                     != resourceGroup.descriptionHtml
 
         each resource in resourceGroup.resources || []
-            .middle
-                .resource(id=resource.elementId)
-                    h3.resource-heading
-                        != resource.name || ((resource.actions[0] != null) && resource.actions[0].name) || 'Resource'
-                        = " "
-                        a.permalink(href=resource.elementLink) &para;
-                    if resource.description
-                        != self.markdown(resource.description)
-                    .action
-                        each model, name in resource.model
+            .resource(id=resource.elementId)
+                h3.resource-heading
+                    != resource.name || ((resource.actions[0] != null) && resource.actions[0].name) || 'Resource'
+                    = " "
+                    a.permalink(href=resource.elementLink) &para;
+                if resource.description
+                    != self.markdown(resource.description)
+                each model, name in resource.model
+                    .right
+                        if model.body
+                            h5 #{name} Example 
+                            pre: code
+                                != self.highlight(model.body, null, ['json', 'yaml', 'xml', 'javascript'])
+                            div(style="height: 1px;")
+                    .middle                                      
+                        .action
                             h4.title
                                 strong
                                     +slugify(name)
                             if model.description
                                 != self.markdown(model.description)
                             +Attributes(model.schema, model.body, null, null, true, self.api.maxDataStructureLevel)
-                            
             each dataStructure in resource.content
                 if dataStructure.element == 'dataStructure' 
                     each object in dataStructure.content
