@@ -14,10 +14,9 @@ script.
   }
   
 mixin slugify(text)
-    .name
-        != text + '&nbsp;'
-        - slug = text.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '')
-        a.permalink(href='#' + slug, id=slug) &para;
+    != text + '&nbsp;'
+    - slug = text.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '')
+    a.permalink(href='#' + slug, id=slug) &para;
 
 mixin Badge(method)
     //- Draw a badge for a given HTTP method
@@ -210,10 +209,12 @@ mixin CurlObject(dataStructure, prefix, level)
           - console.log(prefix)
           - throw 'Could not process element (CurlObject::outer)'
 
-mixin Attributes(schema, body, contentType, title, showRequired)
+mixin Attributes(schema, body, contentType, title, showRequired, maxLevel)
     if schema && body
         .title
-            strong #{title}
+            strong 
+                if title
+                    != title
             if contentType
                 | &nbsp; (#{contentType})
             .collapse-button.show
@@ -221,10 +222,10 @@ mixin Attributes(schema, body, contentType, title, showRequired)
                 span.open Show
         .collapse-content
             dl.inner
-                +AttributeObject(JSON.parse(schema), JSON.parse(body), '', 0, showRequired)
+                +AttributeObject(JSON.parse(schema), JSON.parse(body), '', 0, maxLevel, showRequired)
 
-mixin AttributeObject(schema, body, prefix, level, parent, required, showRequired)
-    if !self.api.maxAttributeLevel || level <= self.api.maxAttributeLevel
+mixin AttributeObject(schema, body, prefix, level, maxLevel, parent, required, showRequired)
+    if !maxLevel || level <= maxLevel
         if schema.type == 'object'
             each property, name in schema.properties
                 - var propertyPrefix = prefix
@@ -238,16 +239,16 @@ mixin AttributeObject(schema, body, prefix, level, parent, required, showRequire
                     - var propertyBody = null
                 if property.type == 'object' || property.type == 'array' 
                     +AttributeElement(property, propertyBody, propertyPrefix, schema, required, showRequired)
-                    +AttributeObject(property, propertyBody, propertyPrefix, level + 1, schema, required, showRequired)
+                    +AttributeObject(property, propertyBody, propertyPrefix, level + 1, maxLevel, schema, required, showRequired)
                 else
-                    +AttributeObject(property, propertyBody, propertyPrefix, level, schema, required, showRequired)
+                    +AttributeObject(property, propertyBody, propertyPrefix, level, maxLevel, schema, required, showRequired)
         else if schema.type == 'array'
                 - var itemPrefix = prefix
                 if level == 0
                     - itemPrefix = itemPrefix + '.<wbr >'
                 - itemPrefix = itemPrefix + '[]<wbr >'
                 if schema.items.type
-                    +AttributeObject(schema.items, body[0], itemPrefix, level + 1, schema, required, showRequired)
+                    +AttributeObject(schema.items, body[0], itemPrefix, level + 1, maxLevel, schema, required, showRequired)
                 //- else
                     //- +AttributeElement(schema, body, itemPrefix, required, showRequired)
         else
@@ -360,7 +361,7 @@ mixin RequestResponseBody(request, collapse, showBlank, showAttributes, showRequ
                 div(style="height: 1px;")
             if request.schema
                 if showAttributes
-                        +Attributes(request.schema, request.body, null, 'Response Attributes', showRequired)
+                        +Attributes(request.schema, request.body, null, 'Response Attributes', showRequired, self.api.maxAttributeLevel)
                 h5 Schema
                 pre: code
                     != self.highlight(request.schema, null, ['json', 'yaml', 'xml'])
@@ -481,11 +482,12 @@ mixin ContentTriple()
                         != self.markdown(resource.description)
                     .action
                         each model, name in resource.model
-                            .title
-                                strong #{name}
+                            h4.title
+                                strong
+                                    +slugify(name)
                             if model.description
                                 != self.markdown(model.description)
-                            +Attributes(model.schema, model.body, null, null, true)
+                            +Attributes(model.schema, model.body, null, null, true, self.api.maxDataStructureLevel)
                             
             each dataStructure in resource.content
                 if dataStructure.element == 'dataStructure' 
@@ -543,7 +545,8 @@ mixin ContentTriple()
                 .middle
                     .action(class=action.methodLower, id=action.elementId)
                         h4.action-heading
-                            +slugify(action.name)
+                            .name
+                                +slugify(action.name)
                             a.method(class=action.methodLower, href=action.elementLink)
                                 = action.method
                             code.uri= self.urldec(action.uriTemplate)
@@ -555,7 +558,7 @@ mixin ContentTriple()
                             //- - console.log(JSON.stringify(action, null, 2))
                         if action.examples[0].requests && action.examples[0].requests[0]
                             - request = action.examples[0].requests[0]
-                            +Attributes(request.schema, request.body, request.contentType, 'Request Attributes', true)
+                            +Attributes(request.schema, request.body, request.contentType, 'Request Attributes', true, null)
 
                         //- A list of sub-sections for parameters, requests
                         //- and responses.

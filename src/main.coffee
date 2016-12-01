@@ -349,8 +349,10 @@ decorate = (api, md, slugCache, verbose) ->
       api.curlHost = meta.value
     if meta.name is 'CURL_OPTIONS'
       api.curlOptions = meta.value
-    if meta.name is 'ATTRIBUTE_LEVELS'
+    if meta.name is 'RESPONSE_ATTRIBUTE_LEVELS'
       api.maxAttributeLevel = meta.value
+    if meta.name is 'DATA_STRUCTURE_LEVELS'
+      api.maxDataStructureLevel = meta.value
   if not api.curlHost
     api.curlHost = api.host
   if not api.curlHost
