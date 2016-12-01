@@ -222,7 +222,7 @@ mixin Attributes(schema, body, contentType, title, showRequired, maxLevel)
                 span.open Show
         .collapse-content
             dl.inner
-                +AttributeObject(JSON.parse(schema), JSON.parse(body), '', 0, maxLevel, showRequired)
+                +AttributeObject(JSON.parse(schema), JSON.parse(body), '', 0, maxLevel, null, null, showRequired)
 
 mixin AttributeObject(schema, body, prefix, level, maxLevel, parent, required, showRequired)
     if !maxLevel || level <= maxLevel
@@ -247,10 +247,8 @@ mixin AttributeObject(schema, body, prefix, level, maxLevel, parent, required, s
                 if level == 0
                     - itemPrefix = itemPrefix + '.<wbr >'
                 - itemPrefix = itemPrefix + '[]<wbr >'
-                if schema.items.type
+                if schema.items.type == 'object' || schema.items.type == 'array' 
                     +AttributeObject(schema.items, body[0], itemPrefix, level + 1, maxLevel, schema, required, showRequired)
-                //- else
-                    //- +AttributeElement(schema, body, itemPrefix, required, showRequired)
         else
             +AttributeElement(schema, body, prefix, required, showRequired)
 
