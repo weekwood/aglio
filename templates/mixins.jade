@@ -42,6 +42,9 @@ mixin Nav()
     //- Draw a navigation bar, which includes links to individual
     //- resources and actions.
     nav
+        .logo
+            if self.api.logo
+                img(src="#{self.api.logo}") 
         if self.api.navItems && self.api.navItems.length
             .resource-group
                 .heading
@@ -470,28 +473,29 @@ mixin ContentTriple()
                     != resourceGroup.descriptionHtml
 
         each resource in resourceGroup.resources || []
-            .resource(id=resource.elementId)
-                h3.resource-heading
-                    != resource.name || ((resource.actions[0] != null) && resource.actions[0].name) || 'Resource'
-                    = " "
-                    a.permalink(href=resource.elementLink) &para;
-                if resource.description
-                    != self.markdown(resource.description)
-                each model, name in resource.model
-                    .right
-                        if model.body
-                            h5 #{name} Example 
-                            pre: code
-                                != self.highlight(model.body, null, ['json', 'yaml', 'xml', 'javascript'])
-                            div(style="height: 1px;")
-                    .middle                                      
-                        .action
-                            h4.title
-                                strong
-                                    +slugify(name)
-                            if model.description
-                                != self.markdown(model.description)
-                            +Attributes(model.schema, model.body, null, null, true, self.api.maxDataStructureLevel)
+            .middle
+                .resource(id=resource.elementId)
+                    h3.resource-heading
+                        != resource.name || ((resource.actions[0] != null) && resource.actions[0].name) || 'Resource'
+                        = " "
+                        a.permalink(href=resource.elementLink) &para;
+                    if resource.description
+                        != self.markdown(resource.description)
+            each model, name in resource.model
+                .right
+                    if model.body
+                        h5 #{name} Example 
+                        pre: code
+                            != self.highlight(model.body, null, ['json', 'yaml', 'xml', 'javascript'])
+                        div(style="height: 1px;")
+                .middle                                      
+                    .action
+                        h4.title
+                            strong
+                                +slugify(name)
+                        if model.description
+                            != self.markdown(model.description)
+                        +Attributes(model.schema, model.body, null, null, true, self.api.maxDataStructureLevel)
             each dataStructure in resource.content
                 if dataStructure.element == 'dataStructure' 
                     each object in dataStructure.content

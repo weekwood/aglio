@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css?family=Roboto:400,700|Inconsolata|Raleway:200');
-
 /* Page-wide variables */
 @padding: 12px;
 @border-radius: 6px;
@@ -8,10 +6,6 @@
 @nav-triple-width: 16.5%;
 @right-panel-width: 48.5%;
 @right-panel-background-width: 48.6%;
-
-@base-font: 400 14px ~"/" 1.42 'Roboto', Helvetica, sans-serif;
-@title-font: 200 36px 'Raleway', Helvetica, sans-serif;
-@code-font: 'Inconsolata', monospace;
 
 /* Basic page-wide colors */
 @background-color: white;
@@ -146,3 +140,97 @@
 .right {
   .hljs-comment{color:#969896}.css .hljs-class,.css .hljs-id,.css .hljs-pseudo,.hljs-attribute,.hljs-regexp,.hljs-tag,.hljs-variable,.html .hljs-doctype,.ruby .hljs-constant,.xml .hljs-doctype,.xml .hljs-pi,.xml .hljs-tag .hljs-title{color:#c66}.hljs-built_in,.hljs-constant,.hljs-literal,.hljs-number,.hljs-params,.hljs-pragma,.hljs-preprocessor{color:#de935f}.css .hljs-rule .hljs-attribute,.ruby .hljs-class .hljs-title{color:#f0c674}.hljs-header,.hljs-inheritance,.hljs-name,.hljs-string,.hljs-value,.ruby .hljs-symbol,.xml .hljs-cdata{color:#b5bd68}.css .hljs-hexcolor,.hljs-title{color:#8abeb7}.coffeescript .hljs-title,.hljs-function,.javascript .hljs-title,.perl .hljs-sub,.python .hljs-decorator,.python .hljs-title,.ruby .hljs-function .hljs-title,.ruby .hljs-title .hljs-keyword{color:#81a2be}.hljs-keyword,.javascript .hljs-function{color:#b294bb}.hljs{display:block;overflow-x:auto;background:#1d1f21;color:#c5c8c6;padding:.5em;-webkit-text-size-adjust:none}.coffeescript .javascript,.javascript .xml,.tex .hljs-formula,.xml .css,.xml .hljs-cdata,.xml .javascript,.xml .vbscript{opacity:.5}
 }
+
+@import url('https://fonts.googleapis.com/css?family=Open+Sans|Source+Code+Pro');
+
+@base-font: 400 14px 'Open Sans', Helvetica, sans-serif;
+@title-font: 200 36px 'Open Sans', Helvetica, sans-serif;
+@code-font: 200 12px 'Source Code Pro', monospace;
+@uri-font: 200 12px 'Source Code Pro', monospace;
+
+@highlight-color1: #0075bf;
+@highlight-color2: #76b82a;
+@dark-background: #666;
+@darker-background: #242729;
+@neutral-background: #e0e0e0;
+@light-background: #F7F7F7;
+@dark-text: #000000;
+@bright-text: #FFFFFF;
+
+@title-color: @highlight-color1;
+@title-background-color: #FFFFFF;
+
+@background-color: #FFFFFF;
+@text-color: @dark-text;
+@link-color: @highlight-color1;
+
+/* Nav and right panel */
+@nav-hover-border-color: #000000;
+@nav-hover-background-color: @neutral-background;
+@nav-background-color: @light-background;
+@nav-border-color: @neutral-background;
+@right-background-color: #2D3134;
+@right-table-background-color: @right-background-color;
+@right-description-background-color: @right-background-color;
+@right-text-color: rgb(221, 228, 232);
+@right-border-color: @neutral-background;
+@middle-border-color: @neutral-background;
+@middle-collapse-background-color: #FFFFFF;
+@middle-description-background-color: #FFFFFF;
+
+@group-border-color: @neutral-background;
+@border-radius: 0px;
+
+@method-color: @dark-text;
+@method-background-color: @neutral-background;
+@method-badge-color: @bright-text;
+@method-badge-background-color: @highlight-color1;
+
+@title-code-background-color: @neutral-background;
+@title-code-color: @dark-text;
+
+@group-title-background-color: #FFFFFF;
+@split-color: @neutral-background;
+
+@inline-code-background-color: @neutral-background;
+@inline-code-text-color: @dark-background;
+
+@code-block-text-color: #000000;
+@code-block-background-color: @neutral-background;
+
+@right-code-block-text-color: @right-text-color;
+@right-code-block-background-color: rgb(39, 43, 45);
+
+@tabs-background-color: @right-background-color;
+@tabs-inactive-background-color: @right-background-color;
+@tabs-active-background-color: #33373A;
+@example-color: @highlight-color2;
+
+@right-highlight-literal: @highlight-color2;
+@right-highlight-string: @right-text-color;
+@right-highlight-value: @right-text-color;
+
+@highlight-literal: @highlight-color2;
+@highlight-string: @text-color;
+@highlight-value: @text-color;
+
+@middle-table-background-color: #FFFFFF;
+@table-background-color: @light-background;
+
+@changelog-date-color: @highlight-color1;
+@changelog-date-background-color: #FFFFFF;
+@changelog-description-color: @dark-text;
+@changelog-description-background-color: #FFFFFF;
+@changelog-border-color: #FFFFFF;
+
+@button-background-color: @right-code-block-background-color;
+@button-active-background-color: @tabs-active-background-color;
+@button-color: @right-text-color;
+@button-active-color: @right-text-color;
+@curl-background-color: @right-code-block-background-color;
+
+@right-menu-background-color: @darker-background;
+@right-menu-active-background-color: @highlight-color1;
+@right-menu-active-color: #FFFFFF;
+@right-menu-active-text-shadow-color: @darker-background;
+@menu-button-border-radius: 5px;

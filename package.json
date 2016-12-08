@@ -1,7 +1,7 @@
 {
-  "name": "aglio-theme-w00tw00t",
-  "version": "2.0.13",
-  "description": "Theme with some fixes for the Aglio API Blueprint renderer",
+  "name": "aglio-theme-peperoncino",
+  "version": "2.0.14",
+  "description": "Theme inspired by the olio theme and stripe api documentation.",
   "main": "lib/main.js",
   "scripts": {
     "build": "coffeelint src/*.coffee && coffee -o lib -c src",
@@ -32,7 +32,7 @@
   "bugs": {
     "url": "https://github.com/christiangoltz/aglio/issues"
   },
-  "homepage": "https://github.com/christiangoltz/aglio/tree/w00tw00t-theme",
+  "homepage": "https://github.com/christiangoltz/aglio/tree/peperoncino-theme",
   "dependencies": {
     "buffer": "5.0.1",
     "coffee-script": "^1.8.0",

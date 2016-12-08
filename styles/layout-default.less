@@ -6,13 +6,17 @@ body {
 }
 
 header {
-    border-bottom: 1px solid @group-title-background-color;
+    border-bottom: none;
     margin-bottom: @padding;
+}
+
+span.required {
+    font-weight: bold;
 }
 
 h1, h2, h3, h4, h5 {
     color: @heading-text-color;
-    margin: @padding 0;
+    //margin: @padding 0;
 
     & .permalink {
         margin-left: 0;
@@ -30,17 +34,20 @@ h1, h2, h3, h4, h5 {
     // container (disabling that rule fixes the problem, hence why it works
     // in the two-column theme).
     .triple & .permalink {
-        opacity: 0.15;
+        opacity: 0;
     }
 
     .triple &:hover .permalink {
-        opacity: 0.15;
+        opacity: 1;
     }
 }
 
 h1 {
     font: @title-font;
     font-size: 36px;
+    color: @title-color;
+    background-color: @title-background-color;
+    padding: @padding @padding;
 }
 
 h2 {
@@ -49,17 +56,21 @@ h2 {
 }
 
 h3 {
-    font-size: 100%;
-    text-transform: uppercase;
+    padding: 0;
+}
+
+h4 {
+    padding: 0 @padding;
 }
 
 h5 {
     font-size: 100%;
     font-weight: normal;
+    padding: 0 @padding;
 }
 
 p {
-    margin: 0 0 10px;
+    margin: @padding @padding;
 
     &.choices {
       line-height: 1.6;
@@ -79,27 +90,54 @@ li {
 
 hr.split {
     border: 0;
-    height: 1px;
+    height: 0px;
     width: 100%;
-    padding-left: @padding / 2;
-    margin: @padding auto;
-    background-image: linear-gradient(to right, fade(@text-color, 0%) 20%, fade(@text-color, 20%) 100% - @right-panel-background-width, fade(@right-text-color, 20%) 100% - @right-panel-background-width, fade(@right-text-color, 0%) 80%);
+    padding: 0;
+    margin: 0;
+    background-color: @split-color;
+}
+
+.wrap {
+     white-space: pre-wrap;      /* CSS3 */
+     white-space: -moz-pre-wrap; /* Firefox */
+     white-space: -pre-wrap;     /* Opera <7 */
+     white-space: -o-pre-wrap;   /* Opera 7 */
+     word-wrap: break-word;      /* IE */
+}
+
+.right {
+    dl {
+        overflow: hidden;
+        dt {
+            float: left;
+            width: 40%;
+            clear: left;
+            text-align: right;
+            .wrap;
+        }
+
+        dd {
+            float: left;
+            max-width: calc(~'60% - 20px');
+            margin-left: 20px;
+        }
+    }
 }
 
 dl {
+    overflow: hidden;
     dt {
         float: left;
-        width: 130px;
+        width: 20%;
         clear: left;
         text-align: right;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        font-weight: 700;
+        .wrap;
     }
 
     dd {
-        margin-left: 150px;
+        float: left;
+        max-width: calc(~'80% - 20px');
+        margin-left: 20px;
     }
 }
 
@@ -115,12 +153,17 @@ blockquote {
     }
 }
 
+.right pre {
+      background-color: @right-code-block-background-color;
+      color: @right-code-block-text-color;
+}
 pre {
     background-color: @code-block-background-color;
     padding: @padding;
-    border: 1px solid @code-block-border-color;
-    border-radius: @border-radius;
+    border: none;
+    border-radius: 0;
     overflow: auto;
+    .wrap;
 
     code {
         color: @code-block-text-color;
@@ -130,36 +173,26 @@ pre {
     }
 }
 
-code {
+.right code {
+    color: @right-code-block-text-color;
+    background-color: @right-code-block-background-color;
+}
+
+.code {
     color: @inline-code-text-color;
     background-color: @inline-code-background-color;
     font: @code-font;
     padding: 1px 4px;
-    border: 1px solid @code-block-border-color;
-    border-radius: 3px;
+    border: none;
+    border-radius: 0;
+}
+
+code {
+    .code;
 }
 
 ul, ol {
   padding-left: 2em;
-}
-
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-  margin-bottom: @padding;
-
-  tr:nth-child(2n) {
-    background-color: @table-row-background-color;
-  }
-
-  th, td {
-    padding: @padding/2 @padding;
-    border: 1px solid @table-border-color;
-  }
-}
-
-.text-muted {
-  opacity: 0.5;
 }
 
 .note, .warning {
@@ -203,21 +236,92 @@ header {
     margin-top: @padding * 2;
 }
 
+.default strong {
+    opacity: 0.5;
+}
+
+.default span {
+    .code;
+}
+
+.right table {
+    width: auto;
+    background-color: @right-table-background-color;
+    margin: 0;
+    padding: @padding / 2 @padding;
+}
+
+.right .description {
+    background-color: @right-description-background-color;
+    width: 100%;
+}
+
+table {
+    background-color: @table-background-color;
+    border: none;
+    margin: @padding -@padding @padding -@padding;
+    padding: @padding / 2 @padding;
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin-bottom: @padding;
+
+    th, td {
+        padding: @padding/2 @padding;
+    }
+    thead {
+        th {
+            border: none;
+            text-align: left;
+        }
+
+        th:nth-child(1) {
+            text-align: right;
+        }
+
+        th:empty {
+            display: none;
+        }
+
+        tr:empty {
+            display: none;
+        }
+    }
+
+    tbody {
+        tr {
+            td {
+                border: none;
+            }
+
+            td:nth-child(1) {
+                text-align: right;
+            }
+        }
+    }
+}
+
 nav {
+    font-size: 100%;
     position: fixed;
-    top: @padding * 2;
+    top: 0;
     bottom: 0;
     overflow-y: auto;
-
+    background-color: @nav-background-color;
+    .logo {
+        padding: @padding;
+    }
     .resource-group {
       padding: 0;
+      border: 0;
+      margin-bottom: 1px;
 
       .heading {
         position: relative;
 
         .chevron {
           position: absolute;
-          top: @padding;
+          top: @padding / 2;
           right: @padding;
           opacity: 0.5;
         }
@@ -226,21 +330,25 @@ nav {
           display: block;
           color: @text-color;
           opacity: 0.7;
-          border-left: 2px solid transparent;
+          border-left: 0;
           margin: 0;
-
+          background-color: @method-background-color;
           &:hover {
             text-decoration: @nav-hover-text-decoration;
             background-color: @nav-hover-background-color;
-            border-left: 2px solid @nav-hover-border-color;
           }
         }
       }
     }
 
+    p a {
+        color: fade(@text-color, 70%);
+    }
+
     ul {
         list-style-type: none;
         padding-left: 0;
+        border-left: 0;
 
         a {
             display: block;
@@ -248,7 +356,7 @@ nav {
             color: fade(@text-color, 70%);
             padding: (2 * @padding / 3) @padding;
             border-top: 1px solid @group-border-color;
-            border-left: 2px solid transparent;
+            border-left: 0;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -256,7 +364,6 @@ nav {
             &:hover {
               text-decoration: @nav-hover-text-decoration;
               background-color: @nav-hover-background-color;
-              border-left: 2px solid @nav-hover-border-color;
             }
         }
 
@@ -319,45 +426,10 @@ nav {
     min-height: @font-size;
     padding: 3px 7px;
     font-size: 12px;
-    color: @group-text-color;
-    background-color: @group-title-background-color;
-    border-radius: 10px;
+    border-radius: 0;
     margin: @badge-margin;
-
-    &.get {
-      color: @get-badge-text-color;
-      background-color: @get-background-color;
-    }
-
-    &.head {
-      color: @head-badge-text-color;
-      background-color: @head-background-color;
-    }
-
-    &.options {
-      color: @options-badge-text-color;
-      background-color: @options-background-color;
-    }
-
-    &.put {
-      color: @put-badge-text-color;
-      background-color: @put-background-color;
-    }
-
-    &.patch {
-      color: @patch-badge-text-color;
-      background-color: @patch-background-color;
-    }
-
-    &.post {
-      color: @post-badge-text-color;
-      background-color: @post-background-color;
-    }
-
-    &.delete {
-      color: @delete-badge-text-color;
-      background-color: @delete-background-color;
-    }
+    color: @method-badge-color;
+    background-color: @method-badge-background-color;
 }
 
 .collapse-button {
@@ -389,6 +461,13 @@ nav {
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.3s ease-in-out;
+}
+
+.middle .collapse-content {
+    padding: @padding / 2 @padding;
+    margin: @padding -@padding @padding -@padding;
+
+    background-color: @middle-collapse-background-color;
 }
 
 /* Layout classes */
@@ -453,6 +532,10 @@ nav {
     box-sizing: border-box;
     width: 100% - @right-panel-width;
     padding-right: @padding;
+
+    p {
+        margin-left: 0;
+    }
 }
 
 .right {
@@ -460,6 +543,7 @@ nav {
     float: right;
     width: @right-panel-width;
     padding-left: @padding;
+    color: @right-text-color;
 
     a {
         color: @right-link-color;
@@ -467,15 +551,11 @@ nav {
 
     h1, h2, h3, h4, h5, p, div {
         color: @right-text-color;
+        font-weight: normal;
     }
 
-    pre {
-        background-color: @right-code-block-background-color;
-        border: 1px solid @right-code-block-border-color;
-
-        code {
-            color: @right-code-block-text-color;
-        }
+    h5 {
+        //font-weight: bold;
     }
 
     .description {
@@ -484,7 +564,11 @@ nav {
 }
 
 .triple .resource-heading {
-  font-size: 125%;
+    font-size: 125%;
+}
+
+.middle .resource {
+    border-top: 1px solid @middle-border-color;
 }
 
 .definition {
@@ -493,39 +577,12 @@ nav {
 
   .method {
     font-weight: bold;
-
-    &.get {
-      color: hsl(hue(@get-background-color), 60%, 45%);
-    }
-
-    &.head {
-      color: hsl(hue(@head-background-color), 60%, 45%);
-    }
-
-    &.options {
-      color: hsl(hue(@options-background-color), 60%, 45%);
-    }
-
-    &.post {
-      color: hsl(hue(@post-background-color), 60%, 45%);
-    }
-
-    &.put {
-      color: hsl(hue(@put-background-color), 60%, 45%);
-    }
-
-    &.patch {
-      color: hsl(hue(@patch-background-color), 60%, 45%);
-    }
-
-    &.delete {
-      color: hsl(hue(@delete-background-color), 60%, 45%);
-    }
   }
 
   .uri {
     word-break: break-all;
     word-wrap: break-word;
+    font: @uri-font;
   }
 
   .hostname {
@@ -533,17 +590,24 @@ nav {
   }
 }
 
-.example-names {
-  background-color: @tabs-background-color;
-  padding: @padding;
+.tab-names {
+  display: table;
+  width:100%;
+  table-layout: fixed;
+
+  background-color: @tabs-inactive-background-color;
+  padding: 0;
   border-radius: @border-radius;
+  margin: 0;
+  width: 100%;
 
   .tab-button {
+    display: table-cell;
     cursor: pointer;
-    color: @text-color;
-    border: 1px solid @tabs-border-color;
+    color: @right-text-color;
+    text-align: center;
     padding: @padding / 2;
-    margin-left: @padding;
+    background-color: @tabs-inactive-background-color;
 
     &.active {
       background-color: @tabs-active-background-color;
@@ -551,18 +615,20 @@ nav {
   }
 }
 
-.right .example-names {
-  background-color: @right-tabs-background-color;
+.tabs {
+    background-color: @tabs-background-color;
 
-  .tab-button {
-    color: @right-text-color;
-    border: 1px solid @right-tabs-border-color;
-    border-radius: @border-radius;
-
-    &.active {
-      background-color: @right-tabs-active-background-color;
+    h4 {
+      padding: @padding @padding;
+      margin: 0;
     }
-  }
+}
+
+.nav-background {
+    width: @nav-triple-width;
+    padding-right: @padding * 1.2;
+    background-color: @nav-background-color;
+    border-right: 1px solid @nav-border-color;
 }
 
 #nav-background {
@@ -584,6 +650,7 @@ nav {
     bottom: -@padding;
     width: @right-panel-background-width;
     background-color: @right-background-color;
+    border-left: 1px solid @right-border-color;
     z-index: -1;
 }
 
@@ -665,7 +732,7 @@ nav {
     border-top-right-radius: 3px;
 }
 
-.resource-group {
+.middle .resource-group {
     padding: @group-padding;
     margin-bottom: @padding;
     background-color: @group-background-color;
@@ -674,6 +741,7 @@ nav {
 
     h2.group-heading, .heading a {
         padding: @group-padding;
+        padding-left: 0;
         margin: @group-header-margin;
         background-color: @group-title-background-color;
         border-bottom: 1px solid @group-border-color;
@@ -692,13 +760,13 @@ nav {
 
     h2.group-heading, .heading a {
         margin: 0 0 @padding 0;
-        border: 1px solid @group-border-color;
+        border: 0;
     }
 }
 
 nav .resource-group{
   .heading a {
-    padding: @padding;
+    padding: @padding / 2 @padding;
     margin-bottom: 0;
   }
 
@@ -707,77 +775,81 @@ nav .resource-group{
   }
 }
 
+.example {
+    strong {
+        opacity: 0.5;
+    }
+    > span {
+        font: @code-font;
+        color: @example-color;
+    }
+}
+
+.right {
+    .hljs-string, .hljs-attribute {
+        color: @right-highlight-string !important;
+    }
+
+    .hljs-literal , .hljs-number {
+        color: @right-highlight-literal !important;
+    }
+
+    .hljs-value {
+        color: @right-highlight-value !important;
+    }
+}
+
+.hljs-string, .hljs-attribute {
+    color: @highlight-string !important;
+}
+
+.hljs-literal , .hljs-number {
+    color: @highlight-literal !important;
+}
+
+.hljs-value {
+    color: @highlight-value !important;
+}
+
+
 .action {
     margin-bottom: @padding;
     padding: @padding @padding 0 @padding;
     overflow: hidden;
-    border: 1px solid transparent;
-    border-radius: @border-radius;
+    border: none;
 
     h4.action-heading {
         padding: @padding / 2 @padding;
         margin: -@padding -@padding @padding -@padding;
-        border-bottom: 1px solid transparent;
-        border-top-left-radius: @border-radius;
-        border-top-right-radius: @border-radius;
         overflow: hidden;
-
+        border: none;
         .name {
-            float: right;
-            font-weight: normal;
-            padding: @padding / 2 0;
+            float: left;
+            display: inline-block;
+            font-weight: bold;
+            padding: @padding / 2 @padding / 2;
         }
 
         .method {
-            padding: @padding / 2 @padding;
+            float: right;
+            padding: @padding / 2 @padding / 2;
             margin-right: @padding;
-            border-radius: ceil(@border-radius / 2);
             display: inline-block;
+            color: @method-color;
+            background-color: @method-background-color;
 
-            &.get {
-                color: contrast(@get-color);
-                background-color: @get-color;
-            }
-
-            &.head {
-                color: contrast(@head-color);
-                background-color: @head-color;
-            }
-
-            &.options {
-                color: contrast(@options-color);
-                background-color: @options-color;
-            }
-
-            &.put {
-                color: contrast(@put-color);
-                background-color: @put-color;
-            }
-
-            &.patch {
-                color: contrast(@patch-color);
-                background-color: @patch-color;
-            }
-
-            &.post {
-                color: contrast(@post-color);
-                background-color: @post-color;
-            }
-
-            &.delete {
-                color: contrast(@delete-color);
-                background-color: @delete-color;
-            }
         }
 
         code {
-            color: @title-code-text-color;
+            float: right;
+            color: @title-code-color;
             background-color: @title-code-background-color;
-            border-color: @title-code-border-color;
+            border: none;
             font-weight: normal;
             word-break: break-all;
             display: inline-block;
             margin-top: 2px;
+            padding: @padding / 2 @padding / 2;
         }
     }
 
@@ -786,78 +858,151 @@ nav .resource-group{
     }
 
     .title {
-        border-bottom: 1px solid @group-background-color;
         margin: 0 -@padding -1px -@padding;
         padding: @padding;
     }
 
-    &.get {
-        border-color: @get-border-color;
+    h4.action-heading {
+        color: @method-color;
+        background: @method-background-color;
+    }
+}
 
-        h4.action-heading {
-            color: @get-color;
-            background: @get-background-color;
-            border-bottom-color: @get-border-color;
+#changelog {
+    width: 100%;
+    h3 {
+        font-size: 100%;
+        color: @changelog-date-color;
+        background-color: @changelog-date-background-color;
+        border-top: 1px solid @changelog-border-color;
+        padding-top: @padding;
+        padding-right: 0;
+        margin-top: @padding;
+        width: 15%;
+        height: auto;
+        float: left;
+        clear: left;
+        .wrap;
+    }
+
+    ul {
+        color: @changelog-description-color;
+        background-color: @changelog-description-background-color;
+        border-top: 1px solid @changelog-border-color;
+        padding-top: @padding;
+        padding-left: 0;
+        margin-top: @padding;
+        width: 85% - @padding;
+        float: left;
+        box-sizing: border-box;
+        display: table;
+
+        li {
+            margin-bottom: @padding / 2;
         }
     }
 
-    &.head {
-        border-color: @head-border-color;
-
-        h4.action-heading {
-            color: @head-color;
-            background: @head-background-color;
-            border-bottom-color: @head-border-color;
-        }
+    h3:before {
+        content: "";
+        height: 1px;
+        background: linear-gradient(to left, rgba(147,147,147,1) 0%,rgba(0,0,0,0) 100%);
+        display: block;
+        margin-bottom: 10px;
+        margin-top: 10px;
     }
 
-    &.options {
-        border-color: @options-border-color;
+    ul:before {
+        content: "";
+        height: 1px;
+        background: linear-gradient(to right, rgba(147,147,147,1) 0%,rgba(0,0,0,0) 100%);
 
-        h4.action-heading {
-            color: @options-color;
-            background: @options-background-color;
-            border-bottom-color: @options-border-color;
+        display: block;
+        margin-bottom: 10px;
+        margin-top: 10px;
+    }
+}
+
+.curl {
+    background-color: @curl-background-color;
+    width: 100%;
+
+    .copy {
+        margin: 0;
+        width: 100%;
+        button {
+            font-size: small;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            padding: @padding / 2 @padding;
+            color: @button-color;
+            background-color: @button-background-color;
+            border: none;
+            &:hover {
+                 color: @button-active-color;
+                 background-color: @button-active-background-color;
+            }
         }
+        float: right;
     }
 
-    &.post {
-        border-color: @post-border-color;
 
-        h4.action-heading {
-            color: @post-color;
-            background: @post-background-color;
-            border-bottom-color: @post-border-color;
+    .command {
+      font: @code-font;
+      pre {
+        &:before {
+            content: '$ ';
         }
+        text-indent: -2em;
+        padding-left: calc(~'2em + @{padding}');
+      }
+
     }
 
-    &.put {
-        border-color: @put-border-color;
-
-        h4.action-heading {
-            color: @put-color;
-            background: @put-background-color;
-            border-bottom-color: @put-border-color;
-        }
+    &::after {
+        clear: both;
+        content: "";
     }
+}
 
-    &.patch {
-        border-color: @patch-border-color;
+.curl:after {
+    content: '';
+    display: block;
+    clear: both;
+}
 
-        h4.action-heading {
-            color: @patch-color;
-            background: @patch-background-color;
-            border-bottom-color: @patch-border-color;
-        }
+.topbar {
+  z-index: 200;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  padding: 0;
+  border-radius: @border-radius;
+  margin: 0;
+
+  .right {
+      padding: 0;
+  }
+  .menu {
+    width: 100%;
+    background-color: @right-menu-background-color;
+
+    .tab-button {
+      display: inline-block;
+      cursor: pointer;
+      color: @right-text-color;
+      text-align: center;
+      padding: @padding / 2 @padding;
+      margin: @padding @padding / 2;
+      background-color: @right-menu-background-color;
+      border-radius: @menu-button-border-radius;
+
+      &.active {
+        background-color: @right-menu-active-background-color;
+        color: @right-menu-active-color;
+        text-shadow: 0 1px 1px #0000FF;
+      }
     }
-
-    &.delete {
-        border-color: @delete-border-color;
-
-        h4.action-heading {
-            color: @delete-color;
-            background: @delete-background-color;
-            border-bottom-color: @delete-border-color;
-        }
-    }
+  }
 }

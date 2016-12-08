@@ -353,6 +353,9 @@ decorate = (api, md, slugCache, verbose) ->
       api.maxAttributeLevel = meta.value
     if meta.name is 'DATA_STRUCTURE_LEVELS'
       api.maxDataStructureLevel = meta.value
+    if meta.name is 'LOGO'
+      api.logo = meta.value
+
   if not api.curlHost
     api.curlHost = api.host
   if not api.curlHost
