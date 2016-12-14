@@ -302,8 +302,10 @@ mixin ExampleTemplate(schema, body)
                   |[
                   != body
                   |]
+                else if body == null
+                  |null
                 else
-                  != body
+                  = body
 
 mixin Example(param)
     if param.content.value
