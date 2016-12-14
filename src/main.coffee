@@ -175,7 +175,7 @@ getCss = (variables, styles, verbose, done) ->
         css = result.css
         fs.writeFileSync compiledPath, css, 'utf-8'
       catch writeErr
-        return done(errMsg 'Error writing cached CSS to file', writeErr)
+        console.warn('Error writing cached CSS to file', writeErr)
 
       benchmark.end 'less-compile'
 
@@ -257,7 +257,7 @@ getTemplate = (name, verbose, done) ->
     try
       fs.writeFileSync compiledPath, compiled, 'utf-8'
     catch writeErr
-      return done(errMsg 'Error writing cached template file', writeErr)
+      console.warn('Error writing cached js to file', writeErr)
 
     benchmark.end 'jade-compile'
 

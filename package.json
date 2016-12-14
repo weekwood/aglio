@@ -1,6 +1,6 @@
 {
   "name": "aglio-theme-peperoncino",
-  "version": "2.0.17",
+  "version": "2.0.18",
   "description": "Theme inspired by the olio theme and stripe api documentation.",
   "main": "lib/main.js",
   "scripts": {
@@ -11,8 +11,7 @@
     "coveralls": "coveralls <coverage/lcov.info",
     "pretest": "npm run build",
     "test": "mocha --compilers coffee:coffee-script/register",
-    "prepublish": "npm run build",
-    "postinstall": "node scripts/setup-cache.js"
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
