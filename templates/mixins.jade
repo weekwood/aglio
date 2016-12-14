@@ -229,7 +229,7 @@ mixin Attributes(schema, body, contentType, title, showRequired, maxLevel)
 
 mixin AttributeObject(schema, body, prefix, level, maxLevel, parent, required, showRequired)
     if !maxLevel || level <= maxLevel
-        if schema.type == 'object'
+        if schema && schema.type == 'object'
             each property, name in schema.properties
                 - var propertyPrefix = prefix
                 if level > 0
@@ -240,17 +240,17 @@ mixin AttributeObject(schema, body, prefix, level, maxLevel, parent, required, s
                     - var propertyBody = body[name]
                 else 
                     - var propertyBody = null
-                if property.type == 'object' || property.type == 'array' 
+                if property && (property.type == 'object' || property.type == 'array')
                     +AttributeElement(property, propertyBody, propertyPrefix, schema, required, showRequired)
                     +AttributeObject(property, propertyBody, propertyPrefix, level + 1, maxLevel, schema, required, showRequired)
                 else
                     +AttributeObject(property, propertyBody, propertyPrefix, level, maxLevel, schema, required, showRequired)
-        else if schema.type == 'array'
+        else if schema && schema.type == 'array'
                 - var itemPrefix = prefix
                 if level == 0
                     - itemPrefix = itemPrefix + '.<wbr >'
                 - itemPrefix = itemPrefix + '[]<wbr >'
-                if schema.items.type == 'object' || schema.items.type == 'array' 
+                if schema.items && (schema.items.type == 'object' || schema.items.type == 'array')
                     +AttributeObject(schema.items, body[0], itemPrefix, level + 1, maxLevel, schema, required, showRequired)
         else
             +AttributeElement(schema, body, prefix, required, showRequired)
@@ -286,7 +286,7 @@ mixin AttributeEnum(enumeration)
             = ' '
             
 mixin AttributeArray(schema)
-    if schema.items.enum
+    if schema && schema.items && schema.items.enum
         p.choices
             strong May Contain:&nbsp;
             each value in schema.items.enum
@@ -295,7 +295,7 @@ mixin AttributeArray(schema)
                     = ' '            
 
 mixin ExampleTemplate(schema, body)
-        if schema.type != 'object' && !(schema.type == 'array' && schema.items.type == 'object')
+        if schema && schema.type != 'object' && !(schema.type == 'array' && schema.items && schema.items.type == 'object')
             strong Example:&nbsp;
             span
                 if schema.type == 'array'
