@@ -1,6 +1,6 @@
 {
   "name": "aglio-theme-peperoncino",
-  "version": "2.0.19",
+  "version": "2.0.21",
   "description": "Theme inspired by the olio theme and stripe api documentation.",
   "main": "lib/main.js",
   "scripts": {
