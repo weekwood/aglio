@@ -140,20 +140,18 @@ mixin CurlTemplate(request, action, api)
                     each content in dataStructure.content
                         +CurlJsonBody(request.body)
                         //- +CurlObject(content, '', 0)
-      div.copy
+      //div.copy
           button(onclick='copyToClipboardWithoutNewlines(\'#{actionName}\')') copy curl command
 
 mixin CurlJsonBody(jsonBody)
     |&nbsp;\
     br
-    |-H 'Content-Type: application/json'&nbsp;\
-    br
-    |-d @- << EOF
+    |-d $'
     br
     - jsonBody = jsonBody.replace(/(?:\r\n|\r|\n)/g, '<br />');
     !=jsonBody
     br
-    |EOF
+    |'
 
 mixin CurlObject(dataStructure, prefix, level)
       if dataStructure.element == 'member'
