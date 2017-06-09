@@ -1,6 +1,6 @@
 {
   "name": "aglio-theme-weekwood",
-  "version": "2.0.21",
+  "version": "2.0.24",
   "description": "Theme inspired by the olio theme and stripe api documentation.",
   "main": "lib/main.js",
   "scripts": {
@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/christiangoltz/aglio"
+    "url": "https://github.com/weekwood/aglio"
   },
   "keywords": [
     "api",
@@ -30,9 +30,9 @@
   "author": "Christian Goltz",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/christiangoltz/aglio/issues"
+    "url": "https://github.com/weekwood/aglio/issues"
   },
-  "homepage": "https://github.com/christiangoltz/aglio/tree/peperoncino-theme",
+  "homepage": "https://github.com/weekwood/aglio/tree/peperoncino-theme",
   "dependencies": {
     "buffer": "5.0.1",
     "coffee-script": "^1.8.0",
