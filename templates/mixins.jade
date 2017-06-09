@@ -348,13 +348,13 @@ mixin RequestResponseBody(request, collapse, showBlank, showAttributes, showRequ
                 pre: code
                     != self.highlight(request.body, null, ['json', 'yaml', 'xml', 'javascript'])
                 div(style="height: 1px;")
-            if request.schema
-                if showAttributes
-                        +Attributes(request.schema, request.body, null, 'Response Attributes', showRequired, self.api.maxAttributeLevel)
-                h5 Schema
-                pre: code
-                    != self.highlight(request.schema, null, ['json', 'yaml', 'xml'])
-                div(style="height: 1px;")
+            //if request.schema
+            //    if showAttributes
+            //        +Attributes(request.schema, request.body, null, 'Response Attributes', showRequired, self.api.maxAttributeLevel)
+            //    h5 Schema
+            //    pre: code
+            //        != self.highlight(request.schema, null, ['json', 'yaml', 'xml'])
+            //    div(style="height: 1px;")
             if !request.hasContent
                 .description.text-muted This response has no content.
                 div(style="height: 1px;")
@@ -550,14 +550,18 @@ mixin ContentTriple()
 
                         //- - console.log(action.name)
                         if action.name == 'Add a user payment method'
+
+                        if action.parameters.length
+                            +Parameters(action.parameters)
                             //- - console.log(JSON.stringify(action, null, 2))
                         if action.examples[0].requests && action.examples[0].requests[0]
                             - request = action.examples[0].requests[0]
                             +Attributes(request.schema, request.body, request.contentType, 'Request Attributes', true, null)
-
+                        if action.examples[0].responses && action.examples[0].responses[0]
+                            - response = action.examples[0].responses[0]
+                            +Attributes(response.schema, response.body, response.contentType, 'Response Attributes', true, null)
                         //- A list of sub-sections for parameters, requests
                         //- and responses.
-                        if action.parameters.length
-                            +Parameters(action.parameters)
+
 
                 hr.split
